@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject, Logger } from '@nestjs/common'
 import {
   BANKING_PROVIDER,
   type GenerateAuthUrlDTO,
@@ -8,6 +8,8 @@ import { env } from 'src/config/env'
 
 @Injectable()
 export default class AddBankAccountUseCase {
+  private readonly logger = new Logger(AddBankAccountUseCase.name);
+
   constructor(
     @Inject(BANKING_PROVIDER)
     private readonly bankingProvider: IBankingProvider
@@ -35,6 +37,7 @@ export default class AddBankAccountUseCase {
   }
 
   async generateAuthUrl(dto: GenerateAuthUrlDTO) {
+    this.logger.log(`Generating URL for bank ${dto.institutionId} with country code ${dto.country}`)
     const body = this.mapDTOtoEnableBanking(dto)
 
     const response = await this.bankingProvider.makeRequest<{
@@ -43,6 +46,8 @@ export default class AddBankAccountUseCase {
       psu_id_hash: string
       state?: string
     }>('/auth', 'POST', body)
+
+    this.logger.log(`Generated url: ${response.url}`)
 
     return response.url
   }

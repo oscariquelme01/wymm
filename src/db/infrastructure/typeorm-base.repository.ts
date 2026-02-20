@@ -9,7 +9,7 @@ import {
   Repository,
   ObjectLiteral,
 } from 'typeorm';
-import { APP_MODULE } from '../constants';
+import { APP_MODULE } from 'src/common/app-constants';
 import {
   BaseRepository,
   DeepPartial,

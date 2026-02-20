@@ -1,5 +1,6 @@
 export const APP_MODULES = {
   BANKING: 'banking',
+  SESSIONS: 'sessions',
   CATEGORIES: 'categories',
   DEBTS: 'debts',
   SNAPSHOTS: 'snapshots',

@@ -6,6 +6,9 @@
 # 99 stuff
 /tmp
 
+# docker volumes
+docker/volumes
+
 # Logs
 logs
 *.log

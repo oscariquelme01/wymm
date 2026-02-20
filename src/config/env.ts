@@ -9,19 +9,7 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function getDbPort(): number {
-  const portStr = process.env.DB_PORT;
-  if (!portStr) {
-    return 5432;
-  }
-  const port = Number(portStr);
-  if (isNaN(port) || port < 1 || port > 65535) {
-    throw new Error(`Invalid DB_PORT: must be a number between 1 and 65535`);
-  }
-  return port;
-}
-
-function readPrivateKey(): string {
+function readEnableBankingPrivateKey(): string {
   const fromEnv = process.env.ENABLE_BANKING_PRIVATE_KEY;
   if (fromEnv) {
     return fromEnv.replace(/\\n/g, '\n');
@@ -42,7 +30,7 @@ export const env = {
   port: Number(process.env.PORT ?? 3000),
   db: {
     host: requireEnv('DB_HOST'),
-    port: getDbPort(),
+    port: Number(process.env.DB_PORT) || 5432,
     name: requireEnv('DB_NAME'),
     password: requireEnv('DB_PASSWORD'),
     username: requireEnv('DB_USERNAME'),
@@ -53,8 +41,7 @@ export const env = {
       process.env.ENABLE_BANKING_BASE_URL ?? 'https://api.enablebanking.com',
     audience: process.env.ENABLE_BANKING_AUDIENCE ?? 'api.enablebanking.com',
     redirectURL:
-      process.env.ENABLE_BANKING_REDIRECT_URL ??
-      'https://jaggier-sheepishly-nubia.ngrok-free.dev/auth/callback', // some ngrook tunnel
-    privateKeyPem: readPrivateKey(),
-  },
+      process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel
+    privateKeyPem: readEnableBankingPrivateKey(),
+  }
 };

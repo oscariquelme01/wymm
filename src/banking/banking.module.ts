@@ -11,7 +11,7 @@ import { BANKING_PROVIDER } from './domain/IBanking-provider.interface';
       provide: BANKING_PROVIDER,
       useClass: EnableBankingBankingProviderAdapter,
     },
-    AddBankAccountUseCase
+    AddBankAccountUseCase,
   ],
 })
 export class BankingModule {}

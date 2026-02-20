@@ -23,14 +23,16 @@ import { txContext } from './typeorm-transaction-context';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class TypeORMBaseRepository<T extends ObjectLiteral> implements BaseRepository<T> {
+export class TypeORMBaseRepository<
+  T extends ObjectLiteral,
+> implements BaseRepository<T> {
   protected readonly module: APP_MODULE;
 
   constructor(private readonly dataSource: DataSource) {}
 
   protected manager(): EntityManager {
     // try to get the manager from a running queryManager transaction from AsyncLocalStorage. Default to the datasource manager
-    const queryRunner = txContext.getStore()
+    const queryRunner = txContext.getStore();
 
     return queryRunner ? queryRunner.manager : this.dataSource.manager;
   }
@@ -43,8 +45,12 @@ export class TypeORMBaseRepository<T extends ObjectLiteral> implements BaseRepos
     return this.repository().save(entity as TypeORMDeepPartial<T>);
   }
 
-  public insert(entity: DeepPartial<T> | Array<DeepPartial<T>>): Promise<RepositoryInsertResult> {
-    return this.repository().insert(entity as QueryDeepPartialEntity<T>) as Promise<RepositoryInsertResult>;
+  public insert(
+    entity: DeepPartial<T> | Array<DeepPartial<T>>,
+  ): Promise<RepositoryInsertResult> {
+    return this.repository().insert(
+      entity as QueryDeepPartialEntity<T>,
+    ) as Promise<RepositoryInsertResult>;
   }
 
   public find(options?: RepositoryFindOptions<T>): Promise<T[]> {
@@ -63,7 +69,9 @@ export class TypeORMBaseRepository<T extends ObjectLiteral> implements BaseRepos
     return this.repository().findOneBy(where as FindOptionsWhere<T>);
   }
 
-  public findAndCount(options?: RepositoryFindOptions<T>): Promise<[T[], number]> {
+  public findAndCount(
+    options?: RepositoryFindOptions<T>,
+  ): Promise<[T[], number]> {
     return this.repository().findAndCount(options as FindManyOptions<T>);
   }
 
@@ -85,8 +93,12 @@ export class TypeORMBaseRepository<T extends ObjectLiteral> implements BaseRepos
     ) as Promise<RepositoryUpdateResult>;
   }
 
-  public delete(criteria: RepositoryCriteria<T>): Promise<RepositoryDeleteResult> {
-    return this.repository().delete(criteria as FindOptionsWhere<T>) as Promise<RepositoryDeleteResult>;
+  public delete(
+    criteria: RepositoryCriteria<T>,
+  ): Promise<RepositoryDeleteResult> {
+    return this.repository().delete(
+      criteria as FindOptionsWhere<T>,
+    ) as Promise<RepositoryDeleteResult>;
   }
 
   public remove(entity: T[]): Promise<T | T[]> {

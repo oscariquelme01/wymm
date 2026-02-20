@@ -1,5 +1,5 @@
-import "dotenv/config";
-import fs from "node:fs";
+import 'dotenv/config';
+import fs from 'node:fs';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -9,32 +9,52 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function getDbPort(): number {
+  const portStr = process.env.DB_PORT;
+  if (!portStr) {
+    return 5432;
+  }
+  const port = Number(portStr);
+  if (isNaN(port) || port < 1 || port > 65535) {
+    throw new Error(`Invalid DB_PORT: must be a number between 1 and 65535`);
+  }
+  return port;
+}
+
 function readPrivateKey(): string {
   const fromEnv = process.env.ENABLE_BANKING_PRIVATE_KEY;
   if (fromEnv) {
-    return fromEnv.replace(/\\n/g, "\n");
+    return fromEnv.replace(/\\n/g, '\n');
   }
 
   const path = process.env.ENABLE_BANKING_PRIVATE_KEY_PATH;
   if (path) {
-    return fs.readFileSync(path, "utf8");
+    return fs.readFileSync(path, 'utf8');
   }
 
   throw new Error(
-    "Missing Enable Banking private key: set ENABLE_BANKING_PRIVATE_KEY or ENABLE_BANKING_PRIVATE_KEY_PATH"
+    'Missing Enable Banking private key: set ENABLE_BANKING_PRIVATE_KEY or ENABLE_BANKING_PRIVATE_KEY_PATH',
   );
 }
 
 export const env = {
-  nodeEnv: process.env.NODE_ENV ?? "development",
+  nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
-  publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "",
-  databaseUrl: process.env.DATABASE_URL ?? "./data/app.sqlite",
+  db: {
+    host: requireEnv('DB_HOST'),
+    port: getDbPort(),
+    name: requireEnv('DB_NAME'),
+    password: requireEnv('DB_PASSWORD'),
+    username: requireEnv('DB_USERNAME'),
+  },
   enableBanking: {
-    appId: requireEnv("ENABLE_BANKING_APP_ID"),
-    baseUrl: process.env.ENABLE_BANKING_BASE_URL ?? "https://api.enablebanking.com",
-    audience: process.env.ENABLE_BANKING_AUDIENCE ?? "api.enablebanking.com",
-    redirectURL: process.env.ENABLE_BANKING_REDIRECT_URL ?? "https://jaggier-sheepishly-nubia.ngrok-free.dev/auth/callback", // some ngrook tunnel
-    privateKeyPem: readPrivateKey()
-  }
+    appId: requireEnv('ENABLE_BANKING_APP_ID'),
+    baseUrl:
+      process.env.ENABLE_BANKING_BASE_URL ?? 'https://api.enablebanking.com',
+    audience: process.env.ENABLE_BANKING_AUDIENCE ?? 'api.enablebanking.com',
+    redirectURL:
+      process.env.ENABLE_BANKING_REDIRECT_URL ??
+      'https://jaggier-sheepishly-nubia.ngrok-free.dev/auth/callback', // some ngrook tunnel
+    privateKeyPem: readPrivateKey(),
+  },
 };

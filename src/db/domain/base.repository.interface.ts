@@ -3,10 +3,10 @@ export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
     ? Array<DeepPartial<U>>
     : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<DeepPartial<U>>
-    : T[P] extends object
-    ? DeepPartial<T[P]>
-    : T[P];
+      ? ReadonlyArray<DeepPartial<U>>
+      : T[P] extends object
+        ? DeepPartial<T[P]>
+        : T[P];
 };
 
 export type RepositoryCriteria<T> = DeepPartial<T> | Array<DeepPartial<T>>;
@@ -33,7 +33,9 @@ export type RepositoryDeleteResult = {
 
 export interface BaseRepository<T> {
   save(entity: DeepPartial<T>): Promise<T>;
-  insert(entity: DeepPartial<T> | Array<DeepPartial<T>>): Promise<RepositoryInsertResult>;
+  insert(
+    entity: DeepPartial<T> | Array<DeepPartial<T>>,
+  ): Promise<RepositoryInsertResult>;
   find(options?: RepositoryFindOptions<T>): Promise<T[]>;
   findOne(options: RepositoryFindOptions<T>): Promise<T | null>;
   findBy(where: RepositoryCriteria<T>): Promise<T[]>;

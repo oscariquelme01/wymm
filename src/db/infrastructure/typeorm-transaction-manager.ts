@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TransactionManager } from '../domain/transaction-manager.interface'
+import { TransactionManager } from '../domain/transaction-manager.interface';
 import { DataSource } from 'typeorm';
 import { txContext } from './typeorm-transaction-context';
 
@@ -10,7 +10,7 @@ export class TypeOrmTransactionManager implements TransactionManager {
   private readonly logger = new Logger(TypeOrmTransactionManager.name);
 
   async start(): Promise<void> {
-    this.logger.log('Starting transaction...')
+    this.logger.log('Starting transaction...');
     if (txContext.getStore()) {
       throw new Error('Transaction already started');
     }
@@ -21,7 +21,7 @@ export class TypeOrmTransactionManager implements TransactionManager {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    this.logger.log(`Transaction started`)
+    this.logger.log(`Transaction started`);
   }
 
   async commit(): Promise<void> {

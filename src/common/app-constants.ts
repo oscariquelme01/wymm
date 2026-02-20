@@ -7,6 +7,6 @@ export const APP_MODULES = {
   TRANSACTIONS: 'transactions',
   TOKENS: 'tokens',
   ACCOUNTS: 'accounts',
-};
+}
 
-export type APP_MODULE = (typeof APP_MODULES)[keyof typeof APP_MODULES];
+export type APP_MODULE = (typeof APP_MODULES)[keyof typeof APP_MODULES]

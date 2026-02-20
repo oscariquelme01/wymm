@@ -1,33 +1,33 @@
-import { createPrivateKey, KeyObject } from 'crypto';
-import { IBankingProvider } from '../domain/IBanking-provider.interface';
-import { SignJWT } from 'jose';
-import { env } from 'src/config/env';
-import { Injectable } from '@nestjs/common';
+import { createPrivateKey, KeyObject } from 'crypto'
+import { IBankingProvider } from '../domain/IBanking-provider.interface'
+import { SignJWT } from 'jose'
+import { env } from 'src/config/env'
+import { Injectable } from '@nestjs/common'
 
-const MAX_TTL_SECONDS = 60 * 60 * 24;
+const MAX_TTL_SECONDS = 60 * 60 * 24
 
-let cachedKey: KeyObject | null = null;
+let cachedKey: KeyObject | null = null
 
 function getPrivateKey(): KeyObject {
   if (!cachedKey) {
-    cachedKey = createPrivateKey(env.enableBanking.privateKeyPem);
+    cachedKey = createPrivateKey(env.enableBanking.privateKeyPem)
   }
-  return cachedKey;
+  return cachedKey
 }
 
 export const enableBankingConfig = {
   baseUrl: env.enableBanking.baseUrl,
-};
+}
 
 @Injectable()
 export class EnableBankingBankingProviderAdapter implements IBankingProvider {
   async makeRequest<T>(
     path: string,
     method: string,
-    body: object = {},
+    body: object = {}
   ): Promise<T> {
-    const token = await this.generateEnableBankingJwt();
-    const url = `${enableBankingConfig.baseUrl}${path}`;
+    const token = await this.generateEnableBankingJwt()
+    const url = `${enableBankingConfig.baseUrl}${path}`
 
     const response = await fetch(url, {
       method: method ?? 'GET',
@@ -37,25 +37,25 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         ...(body ? { 'Content-Type': 'application/json' } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
-    });
+    })
 
     if (!response.ok) {
-      const text = await response.text();
+      const text = await response.text()
       throw new Error(
-        `Enable Banking request failed: ${response.status} ${response.statusText} - ${text}`,
-      );
+        `Enable Banking request failed: ${response.status} ${response.statusText} - ${text}`
+      )
     }
 
-    return (await response.json()) as T;
+    return (await response.json()) as T
   }
 
   private async generateEnableBankingJwt(ttlSeconds = 300): Promise<string> {
     if (ttlSeconds <= 0 || ttlSeconds > MAX_TTL_SECONDS) {
-      throw new Error(`ttl Seconds must be between 1 and ${MAX_TTL_SECONDS}`);
+      throw new Error(`ttl Seconds must be between 1 and ${MAX_TTL_SECONDS}`)
     }
 
-    const now = Math.floor(Date.now() / 1000);
-    const key = getPrivateKey();
+    const now = Math.floor(Date.now() / 1000)
+    const key = getPrivateKey()
 
     return new SignJWT({})
       .setProtectedHeader({
@@ -67,6 +67,6 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       .setAudience(env.enableBanking.audience)
       .setIssuedAt(now)
       .setExpirationTime(now + ttlSeconds)
-      .sign(key);
+      .sign(key)
   }
 }

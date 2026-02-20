@@ -1,20 +1,20 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common'
 import {
   BANKING_PROVIDER,
   type GenerateAuthUrlDTO,
   type IBankingProvider,
-} from '../domain/IBanking-provider.interface';
-import { env } from 'src/config/env';
+} from '../domain/IBanking-provider.interface'
+import { env } from 'src/config/env'
 
 @Injectable()
 export default class AddBankAccountUseCase {
   constructor(
     @Inject(BANKING_PROVIDER)
-    private readonly bankingProvider: IBankingProvider,
+    private readonly bankingProvider: IBankingProvider
   ) {}
 
   execute(dto: GenerateAuthUrlDTO) {
-    return this.generateAuthUrl(dto);
+    return this.generateAuthUrl(dto)
   }
 
   mapDTOtoEnableBanking(dto: GenerateAuthUrlDTO) {
@@ -31,19 +31,19 @@ export default class AddBankAccountUseCase {
       },
       state: crypto.randomUUID(),
       redirect_url: env.enableBanking.redirectURL,
-    };
+    }
   }
 
   async generateAuthUrl(dto: GenerateAuthUrlDTO) {
-    const body = this.mapDTOtoEnableBanking(dto);
+    const body = this.mapDTOtoEnableBanking(dto)
 
     const response = await this.bankingProvider.makeRequest<{
-      url: string;
-      authorization_id: string;
-      psu_id_hash: string;
-      state?: string;
-    }>('/auth', 'POST', body);
+      url: string
+      authorization_id: string
+      psu_id_hash: string
+      state?: string
+    }>('/auth', 'POST', body)
 
-    return response.url;
+    return response.url
   }
 }

@@ -1,7 +1,7 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { join } from 'path';
-import { env } from 'src/config/env';
-import { DataSourceOptions } from 'typeorm';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { join } from 'path'
+import { env } from 'src/config/env'
+import { DataSourceOptions } from 'typeorm'
 
 export const DATABASE_CONFIG: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -22,7 +22,7 @@ export const DATABASE_CONFIG: TypeOrmModuleOptions = {
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,
   },
-};
+}
 
 export const DATASOURCE_CONFIG: DataSourceOptions = {
   type: 'postgres',
@@ -37,4 +37,4 @@ export const DATASOURCE_CONFIG: DataSourceOptions = {
   entities: [join(__dirname, '..', '..', 'src/**/*.schema{.ts,.js}')],
   migrations: [join(__dirname, '..', '..', 'src/migrations/*{.ts,.js}')],
   migrationsTableName: 'migrations',
-};
+}

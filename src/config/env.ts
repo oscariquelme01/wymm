@@ -1,28 +1,28 @@
-import 'dotenv/config';
-import fs from 'node:fs';
+import 'dotenv/config'
+import fs from 'node:fs'
 
 function requireEnv(name: string): string {
-  const value = process.env[name];
+  const value = process.env[name]
   if (!value) {
-    throw new Error(`Missing required env var: ${name}`);
+    throw new Error(`Missing required env var: ${name}`)
   }
-  return value;
+  return value
 }
 
 function readEnableBankingPrivateKey(): string {
-  const fromEnv = process.env.ENABLE_BANKING_PRIVATE_KEY;
+  const fromEnv = process.env.ENABLE_BANKING_PRIVATE_KEY
   if (fromEnv) {
-    return fromEnv.replace(/\\n/g, '\n');
+    return fromEnv.replace(/\\n/g, '\n')
   }
 
-  const path = process.env.ENABLE_BANKING_PRIVATE_KEY_PATH;
+  const path = process.env.ENABLE_BANKING_PRIVATE_KEY_PATH
   if (path) {
-    return fs.readFileSync(path, 'utf8');
+    return fs.readFileSync(path, 'utf8')
   }
 
   throw new Error(
-    'Missing Enable Banking private key: set ENABLE_BANKING_PRIVATE_KEY or ENABLE_BANKING_PRIVATE_KEY_PATH',
-  );
+    'Missing Enable Banking private key: set ENABLE_BANKING_PRIVATE_KEY or ENABLE_BANKING_PRIVATE_KEY_PATH'
+  )
 }
 
 export const env = {
@@ -40,8 +40,7 @@ export const env = {
     baseUrl:
       process.env.ENABLE_BANKING_BASE_URL ?? 'https://api.enablebanking.com',
     audience: process.env.ENABLE_BANKING_AUDIENCE ?? 'api.enablebanking.com',
-    redirectURL:
-      process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel
+    redirectURL: process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel
     privateKeyPem: readEnableBankingPrivateKey(),
-  }
-};
+  },
+}

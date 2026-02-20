@@ -1,4 +1,4 @@
-import { EntitySchemaColumnOptions } from 'typeorm';
+import { EntitySchemaColumnOptions } from 'typeorm'
 
 const BaseSchema = {
   id: {
@@ -27,5 +27,5 @@ const BaseSchema = {
     version: true,
     nullable: true,
   } as EntitySchemaColumnOptions,
-};
-export default BaseSchema;
+}
+export default BaseSchema

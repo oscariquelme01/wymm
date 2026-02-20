@@ -3,16 +3,16 @@ export type BaseModelFields =
   | 'createdAt'
   | 'updatedAt'
   | 'deletedAt'
-  | 'version';
+  | 'version'
 
 export default class BaseModel<T = string> {
   constructor(data: any = null) {
-    Object.assign(this, data);
+    Object.assign(this, data)
   }
 
-  id?: T;
-  createdAt?: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
-  version?: number;
+  id?: T
+  createdAt?: Date
+  updatedAt?: Date
+  deletedAt?: Date
+  version?: number
 }

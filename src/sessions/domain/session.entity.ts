@@ -1,4 +1,4 @@
 export interface Session {
-  expiresAt: Date;
-  accountId: string;
+  expiresAt: Date
+  accountId: string
 }

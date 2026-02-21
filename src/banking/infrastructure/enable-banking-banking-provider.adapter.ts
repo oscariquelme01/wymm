@@ -1,11 +1,12 @@
 import { createPrivateKey, KeyObject } from 'crypto'
-import { IBankingProvider } from '../domain/IBanking-provider.interface'
+import { BankData, GenerateAuthUrlDTO, IBankingProvider } from '../domain/IBanking-provider.interface'
 import { SignJWT } from 'jose'
 import { env } from 'src/config/env'
 import { Injectable } from '@nestjs/common'
 
-const MAX_TTL_SECONDS = 60 * 60 * 24
+import * as EnableBankingTypes from './enable-banking.types'
 
+const MAX_TTL_SECONDS = 60 * 60 * 24
 let cachedKey: KeyObject | null = null
 
 function getPrivateKey(): KeyObject {
@@ -21,7 +22,60 @@ export const enableBankingConfig = {
 
 @Injectable()
 export class EnableBankingBankingProviderAdapter implements IBankingProvider {
-  async makeRequest<T>(
+  async listAvailableBanks() {
+    const availablebanks: Array<BankData> = []
+    const response = await this.makeRequest<EnableBankingTypes.AspspsResponse>('/aspsps', 'GET')
+    for (const aspsp of response.aspsps) {
+      availablebanks.push({
+        name: aspsp.name,
+        country: aspsp.country,
+        accountTypes: aspsp.psu_types,
+        maximumConsentValidity: aspsp.maximum_consent_validity,
+      })
+    }
+
+    return availablebanks
+  }
+
+  async generateAuthUrl(name: string, country: string): Promise<string> {
+    const availableBanks = await this.listAvailableBanks()
+    const filteredBanks = availableBanks.filter((bank) => bank.name === name && bank.country === country)
+    if (!filteredBanks.length) {
+      throw new Error(`Bank ${name} from country ${country} not found!`)
+    }
+    if (filteredBanks.length !== 1) {
+      throw new Error(`Bank ${name} from country ${country} returned more than one result. Ambiguous request, can't tell which one to pick`)
+    }
+
+    const bank = filteredBanks[0]
+    const now = new Date();
+
+    const body = {
+      aspsp: {
+        name: name,
+        country: country,
+      },
+      psu_types: bank,
+      access: {
+        balances: true,
+        transactions: true,
+        valid_until: new Date(now.getTime() + bank.maximumConsentValidity)
+      },
+      state: crypto.randomUUID(),
+      redirect_url: env.enableBanking.redirectURL,
+    }
+
+    const response = await this.makeRequest<{
+      url: string
+      authorization_id: string
+      psu_id_hash: string
+      state?: string
+    }>('/auth', 'POST', body)
+
+    return response.url
+  }
+
+  private async makeRequest<T>(
     path: string,
     method: string,
     body: object = {}
@@ -36,7 +90,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         Authorization: `Bearer ${token}`,
         ...(body ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body && Object.keys(body).length ? JSON.stringify(body) : undefined,
     })
 
     if (!response.ok) {

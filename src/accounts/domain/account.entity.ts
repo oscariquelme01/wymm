@@ -1,10 +1,12 @@
+import BaseModel from "src/db/domain/base.entity"
+
 export enum AccountTypes {
   WANTS = 'wants',
   NEEDS = 'needs',
   INVESTMENTS = 'investments'
 }
 
-export interface Account {
+export interface Account extends BaseModel {
   name: AccountTypes
   currency: string,
   type: AccountTypes

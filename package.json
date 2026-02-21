@@ -15,12 +15,15 @@
     "docker:down:db": "cd docker && docker compose down postgres",
     "start:dev": "env-cmd -f ./env/.env.dev nest start --watch",
     "start:prod": "node dist/main",
+
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d typeorm.datasource.ts",
     "migrations:generate:dev": "env-cmd -f env/.env.dev npm run typeorm -- migration:generate",
     "migrations:run:dev": "env-cmd -f env/.env.dev npm run typeorm -- migration:run",
     "migrations:show:dev": "env-cmd -f env/.env.dev npm run typeorm -- migration:show",
+    "migrations:revert:dev": "env-cmd -f env/.env.dev npm run typeorm -- migration:revert",
     "migrations:run:prod": "env-cmd -f env/.env.prod npm run typeorm -- migration:run",
-    "migrations:show:prod": "env-cmd -f env/.env.prod npm run typeorm -- migration:show"
+    "migrations:show:prod": "env-cmd -f env/.env.prod npm run typeorm -- migration:show",
+    "migrations:revert:prod": "env-cmd -f env/.env.prod npm run typeorm -- migration:revert"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

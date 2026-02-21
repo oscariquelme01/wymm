@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common'
-import AddBankAccountUseCase from '../application/generate-auth-url.use-case'
+import StartBankAuthUseCase from '../application/start-bank-auth.use-case'
 import type { AddBankAccountDTO } from '../domain/IBanking-provider.interface'
-import StartSessionUseCase from '../application/start-session.use-case'
+import AuthorizeBankUseCase from '../application/authorize-bank.use-case'
 
 @Controller('banking')
 export class BankingController {
   constructor(
-    private readonly addBankAccountUseCase: AddBankAccountUseCase,
-    private readonly startSessionUseCase: StartSessionUseCase
+    private readonly addBankAccountUseCase: StartBankAuthUseCase,
+    private readonly startSessionUseCase: AuthorizeBankUseCase
   ) {}
 
   @Post('add-account')

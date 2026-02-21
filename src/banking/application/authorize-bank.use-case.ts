@@ -9,8 +9,8 @@ import {
 } from 'src/tokens/domain/tokens.repository.interface'
 import { TokenTypes } from 'src/tokens/domain/token.entity'
 
-export default class StartSessionUseCase {
-  private readonly logger = new Logger(StartSessionUseCase.name)
+export default class AuthorizeBankUseCase {
+  private readonly logger = new Logger(AuthorizeBankUseCase.name)
 
   constructor(
     @Inject(BANKING_PROVIDER)

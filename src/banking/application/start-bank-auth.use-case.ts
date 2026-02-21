@@ -6,8 +6,8 @@ import {
 } from '../domain/IBanking-provider.interface'
 
 @Injectable()
-export default class AddBankAccountUseCase {
-  private readonly logger = new Logger(AddBankAccountUseCase.name)
+export default class StartBankAuthUseCase {
+  private readonly logger = new Logger(StartBankAuthUseCase.name)
 
   constructor(
     @Inject(BANKING_PROVIDER)

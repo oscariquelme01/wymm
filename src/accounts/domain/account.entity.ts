@@ -7,13 +7,12 @@ export enum AccountTypes {
 }
 
 export interface Account extends BaseModel {
-  name: AccountTypes
+  name: string,
   currency: string,
   type: AccountTypes
   institution: string
   balance: number
   externalId: string
   iban: string
-  expiresAt: Date
-  value: string
+  sessionsId: string
 }

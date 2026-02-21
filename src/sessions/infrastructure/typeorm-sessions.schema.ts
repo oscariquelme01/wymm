@@ -11,14 +11,16 @@ const SessionsSchema = new EntitySchema<Session>({
     expiresAt: {
       type: Date,
     },
+    sessionId: {
+      type: String
+    }
   },
-  // TODO: implement accounts
-  // relations: {
-  //   accountId: {
-  //     type: 'many-to-one',
-  //     target: APP_MODULES.ACCOUNTS,
-  //   },
-  // },
+  relations: {
+    accountId: {
+      type: 'one-to-many',
+      target: APP_MODULES.ACCOUNTS,
+    },
+  },
 })
 
 export default SessionsSchema

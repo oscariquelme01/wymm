@@ -5,10 +5,12 @@ import { BankingController } from './infrastructure/banking.controller'
 import { BANKING_PROVIDER } from './domain/IBanking-provider.interface'
 import { TokensModule } from 'src/tokens/tokens.module'
 import StartSessionUseCase from './application/authorize-bank.use-case'
+import { AccountsModule } from 'src/accounts/accounts.module'
+import { SessionsModule } from 'src/sessions/sessions.module'
 
 @Module({
   controllers: [BankingController],
-  imports: [TokensModule],
+  imports: [TokensModule, AccountsModule, SessionsModule],
   providers: [
     {
       provide: BANKING_PROVIDER,

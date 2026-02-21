@@ -18,7 +18,7 @@ export default class StartBankAuthUseCase {
     this.logger.log(
       `Generating URL for bank ${dto.institutionId} with country code ${dto.country}`
     )
-    const url = await this.bankingProvider.generateAuthUrl(
+    const url = await this.bankingProvider.startBankAuth(
       dto.institutionId,
       dto.country
     )

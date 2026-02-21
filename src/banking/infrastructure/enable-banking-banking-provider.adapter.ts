@@ -1,7 +1,7 @@
 import { createPrivateKey, KeyObject } from 'crypto'
 import {
+    AccountData,
   BankData,
-  AddBankAccountDTO,
   IBankingProvider,
   SessionData,
 } from '../domain/IBanking-provider.interface'
@@ -45,7 +45,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     return availablebanks
   }
 
-  async generateAuthUrl(name: string, country: string): Promise<string> {
+  async startBankAuth(name: string, country: string): Promise<string> {
     const availableBanks = await this.listAvailableBanks()
     const filteredBanks = availableBanks.filter(
       (bank) => bank.name === name && bank.country === country
@@ -87,7 +87,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     return response.url
   }
 
-  async startSession(code: string): Promise<SessionData> {
+  async authorizeSession(code: string): Promise<SessionData> {
     const body = {
       code,
     }
@@ -99,9 +99,21 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         body
       )
 
+    const accountsData: AccountData[] = []
+    for (const account of response.accounts) {
+      accountsData.push({
+        id: account.uid,
+        name: account.name,
+        currency: account.currency,
+        iban: account.account_id?.iban || 'undefined', // necessary guardrails cause not all banks send those
+        institution: account.account_servicer?.name || 'undefined'
+      })
+    }
+
     return {
       validUntil: new Date(response.access.valid_until),
       sessionId: response.session_id,
+      accountsData: accountsData
     }
   }
 

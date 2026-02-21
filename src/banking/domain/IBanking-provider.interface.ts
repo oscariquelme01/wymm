@@ -10,15 +10,24 @@ export interface BankData {
   maximumConsentValidity: number // amount in ms till next auth required
 }
 
+export interface AccountData {
+  id: string
+  name: string,
+  currency: string,
+  iban: string,
+  institution: string
+}
+
 export interface SessionData {
   validUntil: Date
   sessionId: string
+  accountsData: Array<AccountData>
 }
 
 export interface IBankingProvider {
   listAvailableBanks(): Promise<BankData[]>
-  generateAuthUrl(name: string, country: string): Promise<string> // just returns the URL to auth
-  startSession(code: string): Promise<SessionData>
+  startBankAuth(name: string, country: string): Promise<string> // just returns the URL to auth
+  authorizeSession(code: string): Promise<SessionData>
 }
 
 export const BANKING_PROVIDER = 'BANKING_PROVIDER'

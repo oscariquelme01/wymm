@@ -9,8 +9,7 @@ const AccountsSchema = new EntitySchema<Account>({
   columns: {
     ...BaseSchema,
     name: {
-      type: 'enum',
-      enum: AccountTypes,
+      type: String
     },
     currency: {
       type: String,
@@ -31,11 +30,11 @@ const AccountsSchema = new EntitySchema<Account>({
     iban: {
       type: String,
     },
-    expiresAt: {
-      type: Date,
-    },
-    value: {
-      type: String,
+  },
+  relations: {
+    sessionsId: {
+      type: 'many-to-one',
+      target: APP_MODULES.SESSIONS,
     },
   },
 })

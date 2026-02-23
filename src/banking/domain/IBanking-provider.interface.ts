@@ -49,7 +49,7 @@ export interface IBankingProvider {
   authorizeSession(code: string): Promise<SessionData>
   getSessionData(sessionId: string): Promise<SessionData>
   getTransactions(accountId: string): Promise<TransactionData[]>
-  getBalance(accountId: string): Promise<BalanceData[]>
+  getBalance(accountId: string): Promise<BalanceData>
 }
 
 export const BANKING_PROVIDER = 'BANKING_PROVIDER'

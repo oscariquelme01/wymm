@@ -185,20 +185,27 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     return allTransactions
   }
 
-  async getBalance(account: string): Promise<BalanceData[]> {
+  async getBalance(account: string): Promise<BalanceData> {
     const response =
       await this.makeRequest<EnableBankingTypes.BalancesResponse>(
         `/accounts/${account}/balances`,
         'GET'
       )
 
-    return response.balances.map((balance) => ({
+    // CLBD = ClosingBooked
+    const balances = response.balances.filter((balance) => ( balance.balance_type === 'CLBD')).map((balance) => ({
       amount: parseFloat(balance.balance_amount.amount),
       currency: balance.balance_amount.currency,
       asOf: balance.reference_date
         ? new Date(balance.reference_date)
         : undefined,
     }))
+
+    if (!balances.length) {
+      throw new Error('Failed to get the closing booked balance')
+    }
+
+    return balances[0]
   }
 
   private async makeRequest<T>(

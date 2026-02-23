@@ -12,7 +12,12 @@ import { DbModule } from 'src/db/db.module'
 
 @Module({
   controllers: [AccountsController],
-  imports: [TypeOrmModule.forFeature([AccountsSchema]), BankingModule, TransactionsModule, DbModule],
+  imports: [
+    TypeOrmModule.forFeature([AccountsSchema]),
+    BankingModule,
+    TransactionsModule,
+    DbModule,
+  ],
   providers: [
     SyncAccountsUseCase,
     {

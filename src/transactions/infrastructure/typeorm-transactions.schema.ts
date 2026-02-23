@@ -37,7 +37,7 @@ const TransactionsSchema = new EntitySchema<Transaction>({
     },
   },
   relations: {
-    accountId: {
+    account: {
       type: 'many-to-one',
       target: APP_MODULES.ACCOUNTS,
     },

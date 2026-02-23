@@ -1,6 +1,6 @@
 import { createPrivateKey, KeyObject } from 'crypto'
 import {
-    AccountData,
+  AccountData,
   BankData,
   IBankingProvider,
   SessionData,
@@ -106,15 +106,49 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         name: account.name,
         currency: account.currency,
         iban: account.account_id?.iban || 'undefined', // necessary guardrails cause not all banks send those
-        institution: account.account_servicer?.name || 'undefined'
+        institution: account.account_servicer?.name || 'undefined',
       })
     }
 
     return {
       validUntil: new Date(response.access.valid_until),
       sessionId: response.session_id,
-      accountsData: accountsData
+      accountsData: accountsData,
     }
+  }
+
+  async getSessionData(sessionId: string) {
+    const response =
+      await this.makeRequest<EnableBankingTypes.SessionDataResponse>(
+        `/sessions/${sessionId}`,
+        'GET'
+      )
+
+    const accountsData: AccountData[] = []
+    for (const account of response.accounts) {
+      const accountData = await this.makeRequest<EnableBankingTypes.Account>(
+        `/accounts/${account}/details`,
+        'GET'
+      )
+
+      accountsData.push({
+        id: account,
+        name: accountData.name,
+        currency: accountData.currency,
+        iban: accountData.account_id?.iban || 'undefined', // necessary guardrails cause not all banks send those
+        institution: accountData.account_servicer?.name || 'undefined',
+      })
+    }
+
+    return {
+      validUntil: new Date(response.access.valid_until),
+      sessionId: sessionId,
+      accountsData: accountsData,
+    }
+  }
+
+  async getTransactions() {
+    // 1ca8c52b-3bdc-4a01-91a8-4a5980744326
   }
 
   private async makeRequest<T>(

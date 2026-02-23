@@ -12,9 +12,9 @@ export interface BankData {
 
 export interface AccountData {
   id: string
-  name: string,
-  currency: string,
-  iban: string,
+  name: string
+  currency: string
+  iban: string
   institution: string
 }
 
@@ -26,8 +26,9 @@ export interface SessionData {
 
 export interface IBankingProvider {
   listAvailableBanks(): Promise<BankData[]>
-  startBankAuth(name: string, country: string): Promise<string> // just returns the URL to auth
+  startBankAuth(name: string, country: string): Promise<string>
   authorizeSession(code: string): Promise<SessionData>
+  getSessionData(sessionId: string): Promise<SessionData>
 }
 
 export const BANKING_PROVIDER = 'BANKING_PROVIDER'

@@ -8,6 +8,7 @@ import StartSessionUseCase from './application/authorize-bank.use-case'
 import { AccountsModule } from 'src/accounts/accounts.module'
 import { SessionsModule } from 'src/sessions/sessions.module'
 import ListBanksUseCase from './application/list-banks.use-case'
+import GetSessionDataUseCase from './application/get-session-data.use-case'
 
 @Module({
   controllers: [BankingController],
@@ -19,7 +20,8 @@ import ListBanksUseCase from './application/list-banks.use-case'
     },
     StartBankAuthUseCase,
     StartSessionUseCase,
-    ListBanksUseCase
+    ListBanksUseCase,
+    GetSessionDataUseCase,
   ],
 })
 export class BankingModule {}

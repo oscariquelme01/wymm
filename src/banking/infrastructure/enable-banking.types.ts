@@ -140,3 +140,19 @@ export interface AspspInfo {
 export interface Access {
   valid_until: string // ISO date string
 }
+
+export interface SessionDataResponse {
+  access: Access
+  accounts: string[] // array of account UIDs
+  accounts_data: AccountReference[]
+  aspsp: AspspInfo
+  authorized: string // ISO datetime string
+  created: string // ISO datetime string
+  psu_type: string // e.g. "business"
+  status: string // e.g. "AUTHORIZED"
+}
+
+export interface AccountReference {
+  identification_hash: string
+  uid: string
+}

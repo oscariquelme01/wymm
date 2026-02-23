@@ -4,6 +4,8 @@ import {
   BankData,
   IBankingProvider,
   SessionData,
+  Transaction,
+  TransactionTypes,
 } from '../domain/IBanking-provider.interface'
 import { SignJWT } from 'jose'
 import { env } from 'src/config/env'
@@ -147,8 +149,40 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     }
   }
 
-  async getTransactions() {
-    // 1ca8c52b-3bdc-4a01-91a8-4a5980744326
+  async getTransactions(accountId: string): Promise<Transaction[]> {
+    let allTransactions: Transaction[] = []
+    let continuationKey: string | undefined = undefined
+
+    do {
+      const queryParams = continuationKey
+        ? `?continuation_key=${continuationKey}`
+        : ''
+      const path: string = `/accounts/${accountId}/transactions${queryParams}`
+      const response =
+        await this.makeRequest<EnableBankingTypes.TransactionsResponse>(
+          path,
+          'GET'
+        )
+
+      const mappedTransactions: Transaction[] = response.transactions.map(
+        (t) => ({
+          amount: parseFloat(t.transaction_amount.amount),
+          currency: t.transaction_amount.currency,
+          date: new Date(t.booking_date || t.transaction_date || Date.now()),
+          type: t.credit_debit_indicator === 'CRDT' ? 'INCOME' : 'EXPENSE',
+          description:
+            t.remittance_information?.join(' ') || t.note || 'No description',
+          externalId: t.transaction_id || t.entry_reference,
+          creditorName: t.creditor?.name,
+          debtorName: t.debtor?.name,
+        })
+      )
+
+      allTransactions = [...allTransactions, ...mappedTransactions]
+      continuationKey = response.continuation_key
+    } while (continuationKey)
+
+    return allTransactions
   }
 
   private async makeRequest<T>(

@@ -156,3 +156,71 @@ export interface AccountReference {
   identification_hash: string
   uid: string
 }
+
+export interface TransactionsResponse {
+  transactions: Transaction[];
+  continuation_key?: string;
+}
+
+export interface Transaction {
+  entry_reference: string;
+  merchant_category_code?: string;
+
+  transaction_amount: Amount;
+
+  creditor?: Party;
+  creditor_account?: AccountId;
+  creditor_agent?: AccountServicer;
+
+  debtor?: Party;
+  debtor_account?: AccountId;
+  debtor_agent?: AccountServicer;
+
+  bank_transaction_code?: BankTransactionCode;
+
+  credit_debit_indicator: string; // e.g. "CRDT" | "DBIT"
+  status: string; // e.g. "BOOK"
+
+  booking_date?: string; // YYYY-MM-DD
+  value_date?: string;   // YYYY-MM-DD
+  transaction_date?: string; // YYYY-MM-DD
+
+  balance_after_transaction?: Amount;
+
+  reference_number?: string;
+  reference_number_schema?: string;
+
+  remittance_information?: string[];
+
+  debtor_account_additional_identification?: AccountIdentifier;
+  creditor_account_additional_identification?: AccountIdentifier;
+
+  exchange_rate?: ExchangeRate;
+
+  note?: string;
+  transaction_id?: string;
+}
+
+export interface Amount {
+  currency: string;
+  amount: string; // kept as string to preserve precision
+}
+
+export interface Party {
+  name?: string;
+  postal_address?: PostalAddress;
+}
+
+export interface BankTransactionCode {
+  description?: string;
+  code?: string;
+  sub_code?: string;
+}
+
+export interface ExchangeRate {
+  unit_currency: string;
+  exchange_rate: string;
+  rate_type?: string; // e.g. "SPOT"
+  contract_identification?: string;
+  instructed_amount?: Amount;
+}

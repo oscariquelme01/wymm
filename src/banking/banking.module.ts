@@ -7,6 +7,7 @@ import { TokensModule } from 'src/tokens/tokens.module'
 import StartSessionUseCase from './application/authorize-bank.use-case'
 import { AccountsModule } from 'src/accounts/accounts.module'
 import { SessionsModule } from 'src/sessions/sessions.module'
+import ListBanksUseCase from './application/list-banks.use-case'
 
 @Module({
   controllers: [BankingController],
@@ -18,6 +19,7 @@ import { SessionsModule } from 'src/sessions/sessions.module'
     },
     StartBankAuthUseCase,
     StartSessionUseCase,
+    ListBanksUseCase
   ],
 })
 export class BankingModule {}

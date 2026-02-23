@@ -9,7 +9,7 @@ const AccountsSchema = new EntitySchema<Account>({
   columns: {
     ...BaseSchema,
     name: {
-      type: String
+      type: String,
     },
     currency: {
       type: String,
@@ -32,7 +32,7 @@ const AccountsSchema = new EntitySchema<Account>({
     },
   },
   relations: {
-    sessionsId: {
+    sessionId: {
       type: 'many-to-one',
       target: APP_MODULES.SESSIONS,
     },

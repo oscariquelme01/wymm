@@ -3,8 +3,14 @@ import {
   BANKING_PROVIDER,
   type IBankingProvider,
 } from '../domain/IBanking-provider.interface'
-import { ACCOUNTS_REPOSITORY, type AccountsRepository } from 'src/accounts/domain/accounts.repository.interface'
-import { SESSIONS_REPOSITORY, type SessionsRepository } from 'src/sessions/domain/sessions.repository.interface'
+import {
+  ACCOUNTS_REPOSITORY,
+  type AccountsRepository,
+} from 'src/accounts/domain/accounts.repository.interface'
+import {
+  SESSIONS_REPOSITORY,
+  type SessionsRepository,
+} from 'src/sessions/domain/sessions.repository.interface'
 import { AccountTypes } from 'src/accounts/domain/account.entity'
 
 export default class AuthorizeBankUseCase {
@@ -16,7 +22,7 @@ export default class AuthorizeBankUseCase {
     @Inject(ACCOUNTS_REPOSITORY)
     private readonly accountsRepository: AccountsRepository,
     @Inject(SESSIONS_REPOSITORY)
-    private readonly sessionsRepository: SessionsRepository,
+    private readonly sessionsRepository: SessionsRepository
   ) {}
 
   async execute(code: string) {
@@ -28,7 +34,7 @@ export default class AuthorizeBankUseCase {
     )
     const sessionEntry = await this.sessionsRepository.save({
       sessionId: sessionData.sessionId,
-      expiresAt: sessionData.validUntil
+      expiresAt: sessionData.validUntil,
     })
 
     for (const accountData of sessionData.accountsData) {
@@ -41,9 +47,8 @@ export default class AuthorizeBankUseCase {
         type: AccountTypes.NEEDS, // TODO, change this
         iban: accountData.iban,
         institution: accountData.institution,
-        sessionsId: sessionEntry.id
+        sessionId: sessionEntry.id,
       })
     }
-
   }
 }

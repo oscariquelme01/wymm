@@ -4,7 +4,7 @@ import type { AddBankAccountDTO } from 'src/banking/domain/IBanking-provider.int
 import AuthorizeBankUseCase from '../../auth/application/authorize-bank.use-case'
 
 @Controller('auth')
-export class BankingController {
+export class AuthController {
   constructor(
     private readonly startBankAuthUseCase: StartBankAuthUseCase,
     private readonly authorizeBankUseCase: AuthorizeBankUseCase,

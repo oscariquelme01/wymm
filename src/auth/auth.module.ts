@@ -4,8 +4,10 @@ import { SessionsModule } from 'src/sessions/sessions.module'
 import StartBankAuthUseCase from './application/start-bank-auth.use-case'
 import AuthorizeBankUseCase from './application/authorize-bank.use-case'
 import { BankingModule } from 'src/banking/banking.module'
+import { AuthController } from './infrastructure/auth.controller'
 
 @Module({
+  controllers: [AuthController],
   imports: [AccountsModule, SessionsModule, BankingModule],
   providers: [
     StartBankAuthUseCase,

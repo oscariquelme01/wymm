@@ -3,7 +3,7 @@ import {
   BANKING_PROVIDER,
   type AddBankAccountDTO,
   type IBankingProvider,
-} from '../domain/IBanking-provider.interface'
+} from 'src/banking/domain/IBanking-provider.interface'
 
 @Injectable()
 export default class StartBankAuthUseCase {

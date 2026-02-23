@@ -2,7 +2,7 @@ import { Inject, Logger } from '@nestjs/common'
 import {
   BANKING_PROVIDER,
   type IBankingProvider,
-} from '../domain/IBanking-provider.interface'
+} from '../../banking/domain/IBanking-provider.interface'
 import {
   ACCOUNTS_REPOSITORY,
   type AccountsRepository,
@@ -41,10 +41,10 @@ export default class AuthorizeBankUseCase {
       this.logger.debug(`Saving account with id ${accountData.id}`)
       await this.accountsRepository.save({
         name: accountData.name,
-        currency: 'EUR', // might have to change this in the future
+        currency: 'EUR',
         externalId: accountData.id,
-        balance: 0, // TODO, change this
-        type: AccountTypes.NEEDS, // TODO, change this
+        balance: 0,
+        type: AccountTypes.NEEDS,
         iban: accountData.iban,
         institution: accountData.institution,
         sessionId: sessionEntry.id,

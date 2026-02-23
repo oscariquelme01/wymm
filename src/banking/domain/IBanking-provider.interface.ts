@@ -1,3 +1,5 @@
+import { TransactionTypes } from 'src/transactions/domain/transaction.entity'
+
 export interface AddBankAccountDTO {
   institutionId: string
   country: string
@@ -24,19 +26,21 @@ export interface SessionData {
   accountsData: Array<AccountData>
 }
 
-export type TransactionTypes = 'EXPENSE' | 'INCOME' | 'TRANSFER'
-
-export interface Transaction {
+export interface TransactionData {
   amount: number
   currency: string
   date: Date
-  type: TransactionTypes
   description: string
   externalId: string
   creditorName?: string
   debtorName?: string
-  // trasnferGroupId: string // TODO: implement transfers
-  // categoryId: string // TODO: relation between categories
+  type: TransactionTypes
+}
+
+export interface BalanceData {
+  amount: number
+  currency: string
+  asOf?: Date
 }
 
 export interface IBankingProvider {
@@ -44,7 +48,8 @@ export interface IBankingProvider {
   startBankAuth(name: string, country: string): Promise<string>
   authorizeSession(code: string): Promise<SessionData>
   getSessionData(sessionId: string): Promise<SessionData>
-  getTransactions(accountId: string): Promise<Transaction[]>
+  getTransactions(accountId: string): Promise<TransactionData[]>
+  getBalance(accountId: string): Promise<BalanceData[]>
 }
 
 export const BANKING_PROVIDER = 'BANKING_PROVIDER'

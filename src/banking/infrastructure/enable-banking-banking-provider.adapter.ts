@@ -1,11 +1,11 @@
 import { createPrivateKey, KeyObject } from 'crypto'
 import {
   AccountData,
+  BalanceData,
   BankData,
   IBankingProvider,
   SessionData,
-  Transaction,
-  TransactionTypes,
+  TransactionData,
 } from '../domain/IBanking-provider.interface'
 import { SignJWT } from 'jose'
 import { env } from 'src/config/env'
@@ -149,8 +149,8 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     }
   }
 
-  async getTransactions(accountId: string): Promise<Transaction[]> {
-    let allTransactions: Transaction[] = []
+  async getTransactions(accountId: string): Promise<TransactionData[]> {
+    let allTransactions: TransactionData[] = []
     let continuationKey: string | undefined = undefined
 
     do {
@@ -164,25 +164,41 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
           'GET'
         )
 
-      const mappedTransactions: Transaction[] = response.transactions.map(
-        (t) => ({
+      const mappedTransactions: TransactionData[] = response.transactions
+        .filter((t) => t.status !== 'PDNG')
+        .map((t) => ({
           amount: parseFloat(t.transaction_amount.amount),
           currency: t.transaction_amount.currency,
           date: new Date(t.booking_date || t.transaction_date || Date.now()),
           type: t.credit_debit_indicator === 'CRDT' ? 'INCOME' : 'EXPENSE',
           description:
             t.remittance_information?.join(' ') || t.note || 'No description',
-          externalId: t.transaction_id || t.entry_reference,
+          externalId: t.transaction_id ?? t.entry_reference,
           creditorName: t.creditor?.name,
           debtorName: t.debtor?.name,
-        })
-      )
+        }))
 
       allTransactions = [...allTransactions, ...mappedTransactions]
       continuationKey = response.continuation_key
     } while (continuationKey)
 
     return allTransactions
+  }
+
+  async getBalance(account: string): Promise<BalanceData[]> {
+    const response =
+      await this.makeRequest<EnableBankingTypes.BalancesResponse>(
+        `/accounts/${account}/balances`,
+        'GET'
+      )
+
+    return response.balances.map((balance) => ({
+      amount: parseFloat(balance.balance_amount.amount),
+      currency: balance.balance_amount.currency,
+      asOf: balance.reference_date
+        ? new Date(balance.reference_date)
+        : undefined,
+    }))
   }
 
   private async makeRequest<T>(

@@ -22,7 +22,7 @@ const AccountsSchema = new EntitySchema<Account>({
       type: String,
     },
     balance: {
-      type: Number,
+      type: 'decimal',
     },
     externalId: {
       type: String,

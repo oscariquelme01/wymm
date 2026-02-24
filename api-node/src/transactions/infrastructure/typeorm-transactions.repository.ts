@@ -75,7 +75,7 @@ export class TypeORMTransactionsRepository
       .createQueryBuilder('transaction')
       .select(`DATE_TRUNC(:interval, transaction.date)`, 'date') // Use alias 'date'
       .addSelect('SUM(transaction.amount)', 'amount')
-      .groupBy('date')
+      .groupBy(`DATE_TRUNC(:interval, transaction.date)`)
       .orderBy('date', 'ASC')
       .setParameter('interval', interval)
 

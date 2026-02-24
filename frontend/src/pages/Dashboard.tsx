@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
+import { Button } from '../components/ui/button'
 import { fetchAggregate, fetchTimeseries, fetchAccounts, fetchTransactions } from '../services/api'
 import type { Transaction, Account } from '../types'
 import {
@@ -12,7 +13,7 @@ import {
   Bar,
   Legend
 } from 'recharts'
-import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet, ChevronLeft, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { formatCurrency } from '../lib/utils'
 
@@ -22,6 +23,26 @@ export default function Dashboard() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
+  const totalPages = Math.ceil(transactions.length / itemsPerPage) || 1
+  const paginatedTransactions = transactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+  }
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [transactions])
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -196,7 +217,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
-                {transactions.map((transaction) => (
+                {paginatedTransactions.map((transaction) => (
                   <tr key={transaction.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                     <td className="p-4 align-middle">
                         {format(new Date(transaction.date), 'MMM dd, yyyy')}
@@ -216,6 +237,27 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <Button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="bg-transparent text-slate-900 border border-slate-200 hover:bg-slate-100 gap-1 pl-2.5 shadow-none"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="text-sm font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+            <Button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="bg-transparent text-slate-900 border border-slate-200 hover:bg-slate-100 gap-1 pr-2.5 shadow-none"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>

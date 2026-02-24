@@ -1,6 +1,5 @@
 import axios from 'axios'
-import type { BankData, TimeseriesPoint } from '../types'
-
+import type { BankData, TimeseriesPoint, Transaction, Account } from '../types'
 
 const api = axios.create({
   baseURL: 'http://localhost:3000',
@@ -39,4 +38,17 @@ export const fetchTimeseries = async (startDate: string, endDate: string, interv
   return response.data
 }
 
+export const fetchTransactions = async (startDate?: string, endDate?: string, type?: string, accountId?: string): Promise<Transaction[]> => {
+  const response = await api.get('/transactions', {
+    params: { startDate, endDate, type, accountId }
+  })
+  return response.data
+}
+
+export const fetchAccounts = async (): Promise<Account[]> => {
+  const response = await api.get('/accounts')
+  return response.data
+}
+
 export default api
+

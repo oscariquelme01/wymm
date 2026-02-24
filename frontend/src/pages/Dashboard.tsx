@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
-import { mockTransactions, mockAccounts } from '../services/mocks'
-import { fetchAggregate, fetchTimeseries } from '../services/api'
+import { fetchAggregate, fetchTimeseries, fetchAccounts, fetchTransactions } from '../services/api'
+import type { Transaction, Account } from '../types'
 import {
   XAxis,
   YAxis,
@@ -14,10 +14,13 @@ import {
 } from 'recharts'
 import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet } from 'lucide-react'
 import { format } from 'date-fns'
+import { formatCurrency } from '../lib/utils'
 
 export default function Dashboard() {
   const [aggregate, setAggregate] = useState<{ income: number; expense: number } | null>(null)
   const [timeseries, setTimeseries] = useState<{ date: string; income: number; expense: number }[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,11 +29,19 @@ export default function Dashboard() {
         const endDate = new Date().toISOString()
         const startDate = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString()
 
-        const agg = await fetchAggregate(startDate, endDate)
-        setAggregate(agg)
+        console.log(startDate, endDate)
 
-        const incomeSeries = await fetchTimeseries(startDate, endDate, 'day', 'INCOME')
-        const expenseSeries = await fetchTimeseries(startDate, endDate, 'day', 'EXPENSE')
+        const [agg, incomeSeries, expenseSeries, fetchedAccounts, fetchedTransactions] = await Promise.all([
+            fetchAggregate(startDate, endDate),
+            fetchTimeseries(startDate, endDate, 'day', 'INCOME'),
+            fetchTimeseries(startDate, endDate, 'day', 'EXPENSE'),
+            fetchAccounts(),
+            fetchTransactions(startDate, endDate)
+        ])
+
+        setAggregate(agg)
+        setAccounts(fetchedAccounts)
+        setTransactions(fetchedTransactions)
 
         // Merge series
         const merged = incomeSeries.map((item, index) => ({
@@ -66,7 +77,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : `$${aggregate?.income?.toFixed(2) ?? '0.00'}`}
+              {loading ? "..." : formatCurrency(aggregate?.income || 0)}
             </div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
@@ -78,7 +89,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {loading ? "..." : `$${aggregate?.expense?.toFixed(2) ?? '0.00'}`}
+              {loading ? "..." : formatCurrency(aggregate?.expense ||  0)}
             </div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
@@ -90,7 +101,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${((aggregate?.income || 0) - (aggregate?.expense || 0)) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-              {loading ? "..." : `$${((aggregate?.income || 0) - (aggregate?.expense || 0)).toFixed(2)}`}
+              {loading ? "..." : formatCurrency((aggregate?.income || 0) - (aggregate?.expense || 0))}
             </div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
@@ -101,7 +112,7 @@ export default function Dashboard() {
             <Wallet className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockAccounts.length}</div>
+            <div className="text-2xl font-bold">{accounts.length}</div>
             <p className="text-xs text-muted-foreground">Connected</p>
           </CardContent>
         </Card>
@@ -116,7 +127,7 @@ export default function Dashboard() {
              <CardDescription>Income vs Expenses over time</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <div className="h-[300px] w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={timeseries}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -143,7 +154,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockAccounts.map((account) => (
+              {accounts.map((account) => (
                 <div key={account.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center">
@@ -155,7 +166,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="font-medium text-slate-900">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: account.currency }).format(account.balance)}
+                    {formatCurrency(account.balance)}
                   </div>
                 </div>
               ))}
@@ -169,7 +180,7 @@ export default function Dashboard() {
         <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
           <CardDescription>
-            You made {mockTransactions.length} transactions this month.
+            You made {transactions.length} transactions this month.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -184,7 +195,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
-                {mockTransactions.map((transaction) => (
+                {transactions.map((transaction) => (
                   <tr key={transaction.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                     <td className="p-4 align-middle">
                         {format(new Date(transaction.date), 'MMM dd, yyyy')}
@@ -198,7 +209,7 @@ export default function Dashboard() {
                         </span>
                     </td>
                     <td className={`p-4 align-middle text-right font-medium ${transaction.type === 'INCOME' ? 'text-emerald-600' : 'text-slate-900'}`}>
-                        {transaction.type === 'INCOME' ? '+' : '-'}{new Intl.NumberFormat('en-US', { style: 'currency', currency: transaction.currency }).format(transaction.amount)}
+                        {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}
                     </td>
                   </tr>
                 ))}
@@ -210,3 +221,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

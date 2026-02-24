@@ -38,17 +38,40 @@ export default class AuthorizeBankUseCase {
     })
 
     for (const accountData of sessionData.accountsData) {
-      this.logger.debug(`Saving account with id ${accountData.id}`)
-      await this.accountsRepository.save({
-        name: accountData.name,
-        currency: 'EUR',
-        externalId: accountData.id,
-        balance: 0,
-        type: AccountTypes.NEEDS,
+      this.logger.debug(`Processing account with external id ${accountData.id}`)
+
+      // search by iban cause external id changes based on session
+      const existingAccount = await this.accountsRepository.findOneBy({
         iban: accountData.iban,
-        institution: accountData.institution,
-        sessionId: sessionEntry.id,
       })
+
+      if (existingAccount) {
+        this.logger.debug(
+          `Account exists (id: ${existingAccount.id}). Updating session linkage.`
+        )
+
+        await this.accountsRepository.save({
+          ...existingAccount,
+          name: accountData.name,
+          currency: 'EUR',
+          iban: accountData.iban,
+          institution: accountData.institution,
+          sessionId: sessionEntry.id,
+        })
+      } else {
+        this.logger.debug(`Account does not exist. Creating new account.`)
+
+        await this.accountsRepository.save({
+          name: accountData.name,
+          currency: 'EUR',
+          externalId: accountData.id,
+          balance: 0,
+          type: AccountTypes.NEEDS, // TODO: change this!!
+          iban: accountData.iban,
+          institution: accountData.institution,
+          sessionId: sessionEntry.id,
+        })
+      }
     }
   }
 }

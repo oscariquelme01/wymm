@@ -35,11 +35,17 @@ const TransactionsSchema = new EntitySchema<Transaction>({
       type: String,
       nullable: true,
     },
+    accountId: {
+      type: String,
+    },
   },
   relations: {
     account: {
       type: 'many-to-one',
       target: APP_MODULES.ACCOUNTS,
+      joinColumn: {
+        name: 'accountId',
+      },
     },
   },
 })

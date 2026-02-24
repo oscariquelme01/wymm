@@ -73,7 +73,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       access: {
         balances: true,
         transactions: true,
-        valid_until: new Date(now.getTime() + bank.maximumConsentValidity),
+        valid_until: new Date(now.getTime() + bank.maximumConsentValidity * 1000).toISOString(),
       },
       state: crypto.randomUUID(),
       redirect_url: env.enableBanking.redirectURL,

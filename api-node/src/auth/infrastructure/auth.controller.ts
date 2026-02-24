@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common'
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common'
 import StartBankAuthUseCase from '../../auth/application/start-bank-auth.use-case'
 import type { AddBankAccountDTO } from 'src/banking/domain/IBanking-provider.interface'
 import AuthorizeBankUseCase from '../../auth/application/authorize-bank.use-case'

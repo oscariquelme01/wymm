@@ -1,4 +1,5 @@
 import BaseModel from 'src/db/domain/base.entity'
+import { Session } from 'src/sessions/domain/session.entity'
 
 export enum AccountTypes {
   WANTS = 'wants',
@@ -14,5 +15,5 @@ export interface Account extends BaseModel {
   balance: number
   externalId: string
   iban: string
-  sessionId: string
+  session: Session
 }

@@ -56,7 +56,7 @@ export default class AuthorizeBankUseCase {
           currency: 'EUR',
           iban: accountData.iban,
           institution: accountData.institution,
-          sessionId: sessionEntry.id,
+          session: { id: sessionEntry.id }
         })
       } else {
         this.logger.debug(`Account does not exist. Creating new account.`)
@@ -69,7 +69,7 @@ export default class AuthorizeBankUseCase {
           type: AccountTypes.NEEDS, // TODO: change this!!
           iban: accountData.iban,
           institution: accountData.institution,
-          sessionId: sessionEntry.id,
+          session: { id: sessionEntry.id },
         })
       }
     }

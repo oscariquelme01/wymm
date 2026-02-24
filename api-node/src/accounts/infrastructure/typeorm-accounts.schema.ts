@@ -32,7 +32,7 @@ const AccountsSchema = new EntitySchema<Account>({
     },
   },
   relations: {
-    sessionId: {
+    session: {
       type: 'many-to-one',
       target: APP_MODULES.SESSIONS,
     },

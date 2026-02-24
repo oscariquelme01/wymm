@@ -1,7 +1,10 @@
 import { TypeORMBaseRepository } from 'src/db/infrastructure/typeorm-base.repository'
 import { APP_MODULES } from 'src/common/app-constants'
 import { Transaction } from '../domain/transaction.entity'
-import { TransactionsRepository, OptionalQueryParams } from '../domain/transactions.repository.interface'
+import {
+  TransactionsRepository,
+  OptionalQueryParams,
+} from '../domain/transactions.repository.interface'
 import { SelectQueryBuilder } from 'typeorm'
 
 export class TypeORMTransactionsRepository
@@ -10,8 +13,11 @@ export class TypeORMTransactionsRepository
 {
   protected module = APP_MODULES.TRANSACTIONS
 
-  private buildOptionalQueryParams(query: SelectQueryBuilder<Transaction>, optionalParams: OptionalQueryParams) {
-    if (optionalParams.endDate) { 
+  private buildOptionalQueryParams(
+    query: SelectQueryBuilder<Transaction>,
+    optionalParams: OptionalQueryParams
+  ) {
+    if (optionalParams.endDate) {
       const finalEndDate = new Date(optionalParams.endDate)
       finalEndDate.setHours(23, 59, 59, 999)
       query.andWhere('transaction.date <= :endDate', { endDate: finalEndDate })
@@ -28,9 +34,29 @@ export class TypeORMTransactionsRepository
     if (optionalParams.type) {
       query.andWhere('transaction.type = :type', { type: optionalParams.type })
     }
+
+    if (optionalParams.accountId) {
+      query.andWhere('transaction.accountId = :accountId', {
+        accountId: optionalParams.accountId,
+      })
+    }
   }
 
-  async calculateTotal(optionalQueryParams: OptionalQueryParams): Promise<number> {
+  async findAll(
+    optionalQueryParams: OptionalQueryParams
+  ): Promise<Transaction[]> {
+    const query = this.repository()
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.account', 'account')
+
+    this.buildOptionalQueryParams(query, optionalQueryParams)
+
+    return await query.getMany()
+  }
+
+  async calculateTotal(
+    optionalQueryParams: OptionalQueryParams
+  ): Promise<number> {
     const query = this.repository()
       .createQueryBuilder('transaction')
       .select('SUM(transaction.amount)', 'total')
@@ -45,7 +71,6 @@ export class TypeORMTransactionsRepository
     interval: 'day' | 'week' | 'month',
     optionalParams: OptionalQueryParams
   ): Promise<{ date: Date; amount: number }[]> {
-
     const query = this.repository()
       .createQueryBuilder('transaction')
       .select(`DATE_TRUNC(:interval, transaction.date)`, 'date') // Use alias 'date'

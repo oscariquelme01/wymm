@@ -11,6 +11,8 @@ import { TransactionsModule } from 'src/transactions/transactions.module'
 import { DbModule } from 'src/db/db.module'
 import { SyncAccountsCron } from './infrastructure/sync-accounts.cron'
 
+import { GetAccountsUseCase } from './application/get-accounts.use-case'
+
 @Module({
   controllers: [AccountsController],
   imports: [
@@ -21,6 +23,7 @@ import { SyncAccountsCron } from './infrastructure/sync-accounts.cron'
   ],
   providers: [
     SyncAccountsUseCase,
+    GetAccountsUseCase,
     SyncAccountsCron,
     {
       provide: ACCOUNTS_REPOSITORY,

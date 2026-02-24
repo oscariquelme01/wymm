@@ -4,12 +4,14 @@ import { Transaction, TransactionTypes } from './transaction.entity'
 export const TRANSACTIONS_REPOSITORY = 'TRANSACTIONS_REPOSITORY'
 
 export type OptionalQueryParams = {
-  startDate?: Date,
+  startDate?: Date
   endDate?: Date
   type?: TransactionTypes
+  accountId?: string
 }
 
 export interface TransactionsRepository extends BaseRepository<Transaction> {
+  findAll(optionalParams: OptionalQueryParams): Promise<Transaction[]>
   calculateTotal(optionalParams: OptionalQueryParams): Promise<number>
 
   getTimeseries(

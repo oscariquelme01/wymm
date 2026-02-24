@@ -26,17 +26,18 @@ export default function Dashboard() {
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
-        const endDate = new Date().toISOString()
-        const startDate = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString()
+        const today = new Date()
+        const todayString = today.toString()
 
-        console.log(startDate, endDate)
+        const firstDayOfTheMonth = new Date(today.getFullYear(), today.getMonth(), 1).toString()
+        const firstDayOfTheMonthString = firstDayOfTheMonth.toString()
 
         const [agg, incomeSeries, expenseSeries, fetchedAccounts, fetchedTransactions] = await Promise.all([
-            fetchAggregate(startDate, endDate),
-            fetchTimeseries(startDate, endDate, 'day', 'INCOME'),
-            fetchTimeseries(startDate, endDate, 'day', 'EXPENSE'),
+            fetchAggregate(firstDayOfTheMonthString, todayString),
+            fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'INCOME'),
+            fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'EXPENSE'),
             fetchAccounts(),
-            fetchTransactions(startDate, endDate)
+            fetchTransactions(firstDayOfTheMonthString, todayString)
         ])
 
         setAggregate(agg)

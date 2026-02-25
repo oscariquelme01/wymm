@@ -11,7 +11,7 @@ import { Landmark, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react'
 export default function Auth() {
   const [banks, setBanks] = useState<BankData[]>([])
   const [selectedBank, setSelectedBank] = useState<string>('')
-  const [country, setCountry] = useState<string>('FI') // Default to Finland as an example
+  const [country, setCountry] = useState<string>('ES') // Default to Spain
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -59,7 +59,7 @@ function TransactionsTable() {
       } catch (error) {
         console.error("Failed to load transactions", error);
       } finally {
-        setTimeout(() => setLoading(false), 3000);
+        setLoading(false)
       }
     };
     loadTransactions();

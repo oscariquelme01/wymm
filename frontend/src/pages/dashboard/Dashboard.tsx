@@ -6,7 +6,7 @@ import AccountsInfo from "./AccountsInfo";
 export default function Dashboard() {
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900">
           Dashboard

@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, startOfMonth, subMonths } from "date-fns";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -55,15 +55,12 @@ function CashFlowChart() {
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
-        const today = new Date()
-        const todayString = today.toString()
-
-        const firstDayOfTheMonth = new Date(today.getFullYear(), today.getMonth(), 1).toString()
-        const firstDayOfTheMonthString = firstDayOfTheMonth.toString()
+        const endDate = new Date();
+        const startDate =  startOfMonth(subMonths(new Date(), 12))
 
         const [incomeSeries, expenseSeries] = await Promise.all([
-            fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'INCOME'),
-            fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'EXPENSE'),
+            fetchTimeseries(startDate.toString(), endDate.toString(), 'month', 'INCOME'),
+            fetchTimeseries(startDate.toString(), endDate.toString(), 'month', 'EXPENSE'),
         ])
 
         // Merge series
@@ -86,7 +83,7 @@ function CashFlowChart() {
   }, [])
 
   return (
-    <Card className="col-span-4">
+    <Card className="col-span-5">
       <CardHeader>
         <CardTitle>Cash Flow</CardTitle>
         <CardDescription>Income vs Expenses over time</CardDescription>

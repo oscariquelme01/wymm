@@ -1,3 +1,4 @@
+import { startOfMonth } from "date-fns";
 import { ArrowDownRight, ArrowUpRight, DollarSign } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -19,17 +20,10 @@ function MonthRecapCards() {
   useEffect(() => {
     const loadAggregates = async () => {
       try {
-        const today = new Date();
-        const todayString = today.toString();
+        const endDate = new Date();
+        const startDate = startOfMonth(endDate);
 
-        const firstDayOfTheMonth = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          1,
-        ).toString();
-        const firstDayOfTheMonthString = firstDayOfTheMonth.toString();
-
-        const agg = await fetchAggregate(firstDayOfTheMonthString, todayString);
+        const agg = await fetchAggregate(startDate.toString(), endDate.toString());
 
         setAggregate(agg);
       } catch (error) {

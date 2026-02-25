@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "src/components/ui/card";
+import { formatCurrency } from "src/lib/utils";
 import { fetchTimeseries } from "src/services/api";
 
 function CashFlowChartSkeleton() {
@@ -106,7 +107,7 @@ function CashFlowChart({ className }: { className?: string }) {
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
+                  tickFormatter={(value) => formatCurrency(value)}
                   fontSize={12}
                 />
                 <Tooltip

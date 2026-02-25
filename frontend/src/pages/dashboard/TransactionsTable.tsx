@@ -70,7 +70,7 @@ function TransactionsTable({ className } : { className?: string }) {
 
   const [loading, setLoading] = useState(true);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const totalPages = Math.ceil(transactions.length / itemsPerPage) || 1;
   const paginatedTransactions = transactions.slice(

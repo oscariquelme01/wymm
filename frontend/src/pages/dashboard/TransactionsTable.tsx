@@ -59,7 +59,7 @@ function TransactionsTable() {
       } catch (error) {
         console.error("Failed to load transactions", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
     loadTransactions();
@@ -99,16 +99,22 @@ function TransactionsTable() {
           <table className="w-full caption-bottom text-sm">
             <thead className="[&_tr]:border-b">
               <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[15%]">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[10%]">
                   Date
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[55%]">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[50%]">
                   Description
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[15%]">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[10%]">
+                  Account name
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[10%]">
+                  Institution
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[10%]">
                   Type
                 </th>
-                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground w-[15%]">
+                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground w-[10%]">
                   Amount
                 </th>
               </tr>
@@ -122,12 +128,27 @@ function TransactionsTable() {
                     key={transaction.id}
                     className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                   >
+                    {/* Date */}
                     <td className="p-4 align-middle">
                       {format(new Date(transaction.date), "MMM dd, yyyy")}
                     </td>
+
+                    {/* Description */}
                     <td className="p-4 align-middle font-medium">
                       {transaction.description}
                     </td>
+
+                    {/* Account name */}
+                    <td className="p-4 align-middle font-medium">
+                      {transaction.account.name}
+                    </td>
+
+                    {/* Institution */}
+                    <td className="p-4 align-middle font-medium">
+                      {transaction.account.institution}
+                    </td>
+
+                    {/* Type */}
                     <td className="p-4 align-middle">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
@@ -139,6 +160,8 @@ function TransactionsTable() {
                         {transaction.type}
                       </span>
                     </td>
+
+                    {/* Amount */}
                     <td
                       className={`p-4 align-middle text-right font-medium ${transaction.type === "INCOME" ? "text-emerald-600" : "text-slate-900"}`}
                     >

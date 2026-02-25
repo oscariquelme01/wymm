@@ -10,7 +10,7 @@ export interface Transaction {
   externalId: string
   creditorName?: string
   debtorName?: string
-  accountId: string
+  account: Account
 }
 
 export interface Account {

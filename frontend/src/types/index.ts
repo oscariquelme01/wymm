@@ -40,3 +40,20 @@ export interface TimeseriesPoint {
   date: string
   amount: number
 }
+
+export type AnalyticsQueryType = 'aggregate' | 'timeseries' | 'cashflow'
+
+export type TimeseriesInterval = 'day' | 'week' | 'month'
+
+export interface AnalyticsFilters {
+  queryType: AnalyticsQueryType
+  startDate: string
+  endDate: string
+  transactionType?: TransactionTypes
+  interval?: TimeseriesInterval
+}
+
+export type AnalyticsResult =
+  | { kind: 'aggregate'; value: number; transactionType?: TransactionTypes }
+  | { kind: 'timeseries'; data: TimeseriesPoint[]; interval: TimeseriesInterval; transactionType?: TransactionTypes }
+  | { kind: 'cashflow'; value: number }

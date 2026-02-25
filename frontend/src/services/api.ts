@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { BankData, TimeseriesPoint, Transaction, Account } from '../types'
+import type { BankData, TimeseriesPoint, Transaction, Account, TransactionTypes } from '../types'
 
 const api = axios.create({
   baseURL: 'http://localhost:3000',
@@ -31,7 +31,7 @@ export const fetchAggregate = async (startDate: string, endDate: string): Promis
   }
 }
 
-export const fetchTimeseries = async (startDate: string, endDate: string, interval: 'day' | 'week' | 'month', type: 'INCOME' | 'EXPENSE'): Promise<TimeseriesPoint[]> => {
+export const fetchTimeseries = async (startDate: string, endDate: string, interval: 'day' | 'week' | 'month', type?: TransactionTypes): Promise<TimeseriesPoint[]> => {
   const response = await api.get('/analytics/timeseries', {
     params: { startDate, endDate, interval, type }
   })
@@ -47,6 +47,24 @@ export const fetchTransactions = async (startDate?: string, endDate?: string, ty
 
 export const fetchAccounts = async (): Promise<Account[]> => {
   const response = await api.get('/accounts')
+  return response.data
+}
+
+export const fetchCashflow = async (startDate: string, endDate: string): Promise<number> => {
+  const response = await api.get('/analytics/cashflow', {
+    params: { startDate, endDate }
+  })
+  return response.data
+}
+
+export const fetchAggregateByType = async (
+  startDate: string,
+  endDate: string,
+  type?: TransactionTypes
+): Promise<number> => {
+  const response = await api.get('/analytics/aggregate', {
+    params: { startDate, endDate, type }
+  })
   return response.data
 }
 

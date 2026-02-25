@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from 'src/components/ui/card'
-import { fetchAggregate, fetchTimeseries, fetchAccounts } from 'src/services/api'
+import { fetchTimeseries, fetchAccounts } from 'src/services/api'
 import type { Account } from 'src/types'
 import {
   XAxis,
@@ -12,13 +12,13 @@ import {
   Bar,
   Legend
 } from 'recharts'
-import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet } from 'lucide-react'
+import { Wallet } from 'lucide-react'
 import { format } from 'date-fns'
 import { formatCurrency } from 'src/lib/utils'
 import TransactionsTable from './TransactionsTable'
+import MonthRecapCards from './MonthRecapCards'
 
 export default function Dashboard() {
-  const [aggregate, setAggregate] = useState<{ income: number; expense: number } | null>(null)
   const [timeseries, setTimeseries] = useState<{ date: string; income: number; expense: number }[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,14 +33,12 @@ export default function Dashboard() {
         const firstDayOfTheMonth = new Date(today.getFullYear(), today.getMonth(), 1).toString()
         const firstDayOfTheMonthString = firstDayOfTheMonth.toString()
 
-        const [agg, incomeSeries, expenseSeries, fetchedAccounts] = await Promise.all([
-            fetchAggregate(firstDayOfTheMonthString, todayString),
+        const [incomeSeries, expenseSeries, fetchedAccounts] = await Promise.all([
             fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'INCOME'),
             fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'EXPENSE'),
             fetchAccounts(),
         ])
 
-        setAggregate(agg)
         setAccounts(fetchedAccounts)
 
         // Merge series
@@ -68,55 +66,7 @@ export default function Dashboard() {
         <p className="text-slate-500">Overview of your financial health.</p>
       </div>
 
-      {/* Analytics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? "..." : formatCurrency(aggregate?.income || 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-            <ArrowDownRight className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {loading ? "..." : formatCurrency(aggregate?.expense ||  0)}
-            </div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Income</CardTitle>
-            <DollarSign className="h-4 w-4 text-slate-500" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${((aggregate?.income || 0) - (aggregate?.expense || 0)) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-              {loading ? "..." : formatCurrency((aggregate?.income || 0) - (aggregate?.expense || 0))}
-            </div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
-         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Accounts</CardTitle>
-            <Wallet className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{accounts.length}</div>
-            <p className="text-xs text-muted-foreground">Connected</p>
-          </CardContent>
-        </Card>
-      </div>
+      <MonthRecapCards/>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         

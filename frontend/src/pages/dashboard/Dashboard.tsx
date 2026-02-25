@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { fetchAggregate, fetchTimeseries, fetchAccounts, fetchTransactions } from '../services/api'
-import type { Transaction, Account } from '../types'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from 'src/components/ui/card'
+import { fetchAggregate, fetchTimeseries, fetchAccounts } from 'src/services/api'
+import type { Account } from 'src/types'
 import {
   XAxis,
   YAxis,
@@ -13,36 +12,17 @@ import {
   Bar,
   Legend
 } from 'recharts'
-import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet } from 'lucide-react'
 import { format } from 'date-fns'
-import { formatCurrency } from '../lib/utils'
+import { formatCurrency } from 'src/lib/utils'
+import TransactionsTable from './TransactionsTable'
 
 export default function Dashboard() {
   const [aggregate, setAggregate] = useState<{ income: number; expense: number } | null>(null)
   const [timeseries, setTimeseries] = useState<{ date: string; income: number; expense: number }[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
-  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
 
-  const totalPages = Math.ceil(transactions.length / itemsPerPage) || 1
-  const paginatedTransactions = transactions.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
-
-  const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1))
-  }
-
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-  }
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [transactions])
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -53,17 +33,15 @@ export default function Dashboard() {
         const firstDayOfTheMonth = new Date(today.getFullYear(), today.getMonth(), 1).toString()
         const firstDayOfTheMonthString = firstDayOfTheMonth.toString()
 
-        const [agg, incomeSeries, expenseSeries, fetchedAccounts, fetchedTransactions] = await Promise.all([
+        const [agg, incomeSeries, expenseSeries, fetchedAccounts] = await Promise.all([
             fetchAggregate(firstDayOfTheMonthString, todayString),
             fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'INCOME'),
             fetchTimeseries(firstDayOfTheMonthString, todayString, 'day', 'EXPENSE'),
             fetchAccounts(),
-            fetchTransactions(firstDayOfTheMonthString, todayString)
         ])
 
         setAggregate(agg)
         setAccounts(fetchedAccounts)
-        setTransactions(fetchedTransactions)
 
         // Merge series
         const merged = incomeSeries.map((item, index) => ({
@@ -198,69 +176,7 @@ export default function Dashboard() {
       </div>
 
       {/* Transactions Table (Main) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>
-            You made {transactions.length} transactions this month.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative w-full overflow-auto">
-            <table className="w-full caption-bottom text-sm">
-              <thead className="[&_tr]:border-b">
-                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Description</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="[&_tr:last-child]:border-0">
-                {paginatedTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <td className="p-4 align-middle">
-                        {format(new Date(transaction.date), 'MMM dd, yyyy')}
-                    </td>
-                    <td className="p-4 align-middle font-medium">{transaction.description}</td>
-                    <td className="p-4 align-middle">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
-                            transaction.type === 'INCOME' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
-                        }`}>
-                            {transaction.type}
-                        </span>
-                    </td>
-                    <td className={`p-4 align-middle text-right font-medium ${transaction.type === 'INCOME' ? 'text-emerald-600' : 'text-slate-900'}`}>
-                        {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="bg-transparent text-slate-900 border border-slate-200 hover:bg-slate-100 gap-1 pl-2.5 shadow-none"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <div className="text-sm font-medium">
-              Page {currentPage} of {totalPages}
-            </div>
-            <Button
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="bg-transparent text-slate-900 border border-slate-200 hover:bg-slate-100 gap-1 pr-2.5 shadow-none"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <TransactionsTable/>
     </div>
   )
 }

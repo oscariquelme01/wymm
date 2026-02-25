@@ -34,10 +34,7 @@ const TransactionsSchema = new EntitySchema<Transaction>({
     debtorName: {
       type: String,
       nullable: true,
-    },
-    accountId: {
-      type: String,
-    },
+    }
   },
   relations: {
     account: {

@@ -14,14 +14,13 @@ export default function Dashboard() {
         <p className="text-slate-500">Overview of your financial health.</p>
       </div>
 
-      <MonthRecapCards />
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <CashFlowChart />
-        <AccountsInfo />
+        <MonthRecapCards className="col-span-5"/>
+        <AccountsInfo className="col-span-2 row-span-2" />
+        <CashFlowChart className="col-span-5"/>
+        <TransactionsTable className="md:col-span-7 col-span-2" />
       </div>
 
-      <TransactionsTable />
     </div>
   );
 }

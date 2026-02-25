@@ -43,7 +43,7 @@ function TransactionsTableSkeletonRows({ rows = 10 }: { rows?: number }) {
   );
 }
 
-function TransactionsTable() {
+function TransactionsTable({ className } : { className?: string }) {
   useEffect(() => {
     const loadTransactions = async () => {
       try {
@@ -87,7 +87,7 @@ function TransactionsTable() {
   };
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Recent Transactions</CardTitle>
         <CardDescription>

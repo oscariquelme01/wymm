@@ -48,7 +48,7 @@ function CashFlowChartSkeleton() {
   );
 }
 
-function CashFlowChart() {
+function CashFlowChart({ className }: { className?: string }) {
   const [timeseries, setTimeseries] = useState<{ date: string; income: number; expense: number }[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -74,8 +74,7 @@ function CashFlowChart() {
       } catch (error) {
         console.error('Failed to load cashflow', error)
       } finally {
-        // setLoading(false)
-        setTimeout(() => setLoading(false), 3000)
+        setLoading(false)
       }
     }
 
@@ -83,7 +82,7 @@ function CashFlowChart() {
   }, [])
 
   return (
-    <Card className="col-span-5">
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Cash Flow</CardTitle>
         <CardDescription>Income vs Expenses over time</CardDescription>

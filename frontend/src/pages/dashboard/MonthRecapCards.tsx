@@ -7,10 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "src/components/ui/card";
-import { formatCurrency } from "src/lib/utils";
+import { cn, formatCurrency } from "src/lib/utils";
 import { fetchAggregate } from "src/services/api";
 
-function MonthRecapCards() {
+function MonthRecapCards({ className }: { className?: string }) {
   const [loading, setLoading] = useState(true);
   const [aggregate, setAggregate] = useState<{
     income: number;
@@ -37,7 +37,7 @@ function MonthRecapCards() {
   }, []);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className={cn("grid gap-4 md:grid-cols-1 lg:grid-cols-3 w-full", className)}>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Income</CardTitle>

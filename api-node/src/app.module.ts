@@ -9,6 +9,7 @@ import { SessionsModule } from './sessions/sessions.module'
 import { AuthModule } from './auth/auth.module'
 import { TransactionsModule } from './transactions/transactions.module'
 import { AnalyticsModule } from './analytics/analytics.module'
+import { CategoriesModule } from './categories/categories.module'
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AnalyticsModule } from './analytics/analytics.module'
     SessionsModule,
     TransactionsModule,
     AnalyticsModule,
+    CategoriesModule
   ],
 })
 export class AppModule {}

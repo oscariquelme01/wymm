@@ -1,5 +1,6 @@
 import { Account } from 'src/accounts/domain/account.entity'
 import BaseModel from 'src/db/domain/base.entity'
+import { TransactionCategorization } from './transaction-categorization.entity'
 
 export type TransactionTypes = 'EXPENSE' | 'INCOME' | 'TRANSFER'
 
@@ -14,6 +15,6 @@ export interface Transaction extends BaseModel {
   debtorName?: string
   accountId: string
   account: Account
+  transactionCategorization: TransactionCategorization
   // trasnferGroupId: string // TODO: implement transfers
-  // categoryId: string // TODO: relation between categories
 }

@@ -5,6 +5,7 @@ export const APP_MODULES = {
   DEBTS: 'debts',
   SNAPSHOTS: 'snapshots',
   TRANSACTIONS: 'transactions',
+  TRANSACTIONS_CATEGORIZATION: 'transactionsCategorization',
   TOKENS: 'tokens',
   ACCOUNTS: 'accounts',
 }

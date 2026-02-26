@@ -34,7 +34,7 @@ const TransactionsSchema = new EntitySchema<Transaction>({
     debtorName: {
       type: String,
       nullable: true,
-    }
+    },
   },
   relations: {
     account: {
@@ -42,6 +42,13 @@ const TransactionsSchema = new EntitySchema<Transaction>({
       target: APP_MODULES.ACCOUNTS,
       joinColumn: {
         name: 'accountId',
+      },
+    },
+    transactionCategorization: {
+      type: 'one-to-one',
+      target: APP_MODULES.TRANSACTIONS_CATEGORIZATION,
+      joinColumn: {
+        name: 'categorizationId'
       },
     },
   },

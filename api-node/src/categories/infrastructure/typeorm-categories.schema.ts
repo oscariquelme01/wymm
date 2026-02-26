@@ -2,6 +2,7 @@ import { EntitySchema } from 'typeorm'
 import { Category } from '../domain/category.entity'
 import { APP_MODULES } from 'src/common/app-constants'
 import BaseSchema from 'src/db/infrastructure/typeorm-base.schema'
+import { type } from 'os'
 
 const CategoriesSchema = new EntitySchema<Category>({
   name: APP_MODULES.CATEGORIES,

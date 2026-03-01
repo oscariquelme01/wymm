@@ -14,7 +14,7 @@
     "docker:down:all": "cd docker && docker compose down",
     "docker:down:db": "cd docker && docker compose down postgres",
     "start:dev": "env-cmd -f ./env/.env.dev nest start --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d typeorm.datasource.ts",
     "migrations:generate:dev": "env-cmd -f env/.env.dev npm run typeorm -- migration:generate",
     "migrations:run:dev": "env-cmd -f env/.env.dev npm run typeorm -- migration:run",

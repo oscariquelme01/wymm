@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: wymm
+      TZ: Europe/Madrid
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d wymm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: wymm
+      DB_USERNAME: user
+      DB_PASSWORD: user
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      ENABLE_BANKING_APP_ID: ${ENABLE_BANKING_APP_ID}
+      ENABLE_BANKING_PRIVATE_KEY: ${ENABLE_BANKING_PRIVATE_KEY:-}
+      ENABLE_BANKING_PRIVATE_KEY_PATH: ${ENABLE_BANKING_PRIVATE_KEY_PATH:-}
+      ENABLE_BANKING_BASE_URL: ${ENABLE_BANKING_BASE_URL:-https://api.enablebanking.com}
+      ENABLE_BANKING_AUDIENCE: ${ENABLE_BANKING_AUDIENCE:-api.enablebanking.com}
+      ENABLE_BANKING_REDIRECT_URL: ${ENABLE_BANKING_REDIRECT_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    depends_on:
+      - api
+
+  ml-classifier:
+    ports:
+      - "8000:8000"
+    environment:
+      ANTRHOPIC_API_KEY: ${ANTRHOPIC_API_KEY}
+
+volumes:
+  postgres-data:

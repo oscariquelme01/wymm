@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: ./api-node
+      dockerfile: docker/Dockerfile.dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./api-node/src:/app/src
+    depends_on:
+      ngrok:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+
+  ml-classifier:
+    build:
+      context: ./ml-classifier-python
+      dockerfile: Dockerfile
+    volumes:
+      - ./ml-classifier-python/server.py:/app/server.py
+      - ./ml-classifier-python/classifier.py:/app/classifier.py
+    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command: ["http", "api:3000"]

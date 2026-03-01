@@ -2,7 +2,7 @@ import anthropic
 import json
 import os
 
-client = anthropic.Anthropic(api_key=os.environ.get('ANTRHOPIC_API_KEY'))
+client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 
 CATEGORIES = [
     "1. Food & Dining - Restaurants, groceries, fast food, coffee shops, food delivery"

@@ -18,9 +18,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "src/components/ui/card"
-import { formatCurrency } from "src/lib/utils"
-import type { AnalyticsResult } from "src/types"
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { cn, formatCurrency } from "@/lib/utils"
+import type { AnalyticsResult } from "@/types"
 
 interface AnalyticsResultsProps {
   result: AnalyticsResult | null
@@ -33,13 +35,21 @@ function ResultSkeleton() {
     <Card>
       <CardContent className="p-6">
         <div className="space-y-3">
-          <div className="h-4 w-32 rounded bg-muted animate-pulse" />
-          <div className="h-8 w-48 rounded bg-muted animate-pulse" />
-          <div className="h-4 w-64 rounded bg-muted animate-pulse" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
         </div>
       </CardContent>
     </Card>
   )
+}
+
+const tooltipStyle = {
+  borderRadius: "8px",
+  border: "1px solid var(--border)",
+  backgroundColor: "var(--popover)",
+  color: "var(--popover-foreground)",
+  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
 }
 
 function AggregateResult({
@@ -58,10 +68,20 @@ function AggregateResult({
         <CardDescription>{label}</CardDescription>
         <CardTitle className="flex items-center gap-3">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg ${isExpense ? "bg-red-100" : "bg-emerald-100"}`}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-lg",
+              isExpense
+                ? "bg-red-100 dark:bg-red-900/30"
+                : "bg-emerald-100 dark:bg-emerald-900/30"
+            )}
           >
             <DollarSign
-              className={`h-5 w-5 ${isExpense ? "text-red-600" : "text-emerald-600"}`}
+              className={cn(
+                "h-5 w-5",
+                isExpense
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-emerald-600 dark:text-emerald-400"
+              )}
             />
           </div>
           <span className="text-3xl font-bold">
@@ -87,14 +107,27 @@ function CashflowResult({
         <CardDescription>Net Cashflow</CardDescription>
         <CardTitle className="flex items-center gap-3">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg ${isPositive ? "bg-emerald-100" : "bg-red-100"}`}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-lg",
+              isPositive
+                ? "bg-emerald-100 dark:bg-emerald-900/30"
+                : "bg-red-100 dark:bg-red-900/30"
+            )}
           >
             <Icon
-              className={`h-5 w-5 ${isPositive ? "text-emerald-600" : "text-red-600"}`}
+              className={cn(
+                "h-5 w-5",
+                isPositive
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-red-600 dark:text-red-400"
+              )}
             />
           </div>
           <span
-            className={`text-3xl font-bold ${isPositive ? "text-emerald-600" : "text-red-600"}`}
+            className={cn(
+              "text-3xl font-bold",
+              isPositive ? "text-emerald-600" : "text-red-600"
+            )}
           >
             {isPositive ? "+" : ""}
             {formatCurrency(result.value)}
@@ -102,7 +135,7 @@ function CashflowResult({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted-foreground">
           {isPositive
             ? "You earned more than you spent in this period."
             : "You spent more than you earned in this period."}
@@ -142,7 +175,7 @@ function TimeseriesResult({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-slate-500" />
+          <BarChart3 className="h-5 w-5 text-muted-foreground" />
           Timeseries — {label}
         </CardTitle>
         <CardDescription>
@@ -152,33 +185,35 @@ function TimeseriesResult({
       <CardContent>
         <div className="h-80 w-full">
           {chartData.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-slate-400">
+            <div className="flex h-full items-center justify-center text-muted-foreground">
               No data available for this period
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               {useLineChart ? (
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="var(--border)"
+                  />
                   <XAxis
                     dataKey="date"
                     tickLine={false}
                     axisLine={false}
                     tickMargin={10}
                     fontSize={12}
+                    stroke="var(--muted-foreground)"
                   />
                   <YAxis
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(v) => `$${v}`}
+                    tickFormatter={(v) => formatCurrency(v)}
                     fontSize={12}
+                    stroke="var(--muted-foreground)"
                   />
                   <Tooltip
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "none",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
+                    contentStyle={tooltipStyle}
                     formatter={(value: number | undefined) => [
                       formatCurrency(value ?? 0),
                       label,
@@ -196,27 +231,29 @@ function TimeseriesResult({
                 </LineChart>
               ) : (
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="var(--border)"
+                  />
                   <XAxis
                     dataKey="date"
                     tickLine={false}
                     axisLine={false}
                     tickMargin={10}
                     fontSize={12}
+                    stroke="var(--muted-foreground)"
                   />
                   <YAxis
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(v) => `$${v}`}
+                    tickFormatter={(v) => formatCurrency(v)}
                     fontSize={12}
+                    stroke="var(--muted-foreground)"
                   />
                   <Tooltip
-                    cursor={{ fill: "transparent" }}
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "none",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
+                    cursor={{ fill: "var(--accent)" }}
+                    contentStyle={tooltipStyle}
                     formatter={(value: number | undefined) => [
                       formatCurrency(value ?? 0),
                       label,
@@ -246,14 +283,11 @@ function AnalyticsResults({ result, loading, error }: AnalyticsResultsProps) {
 
   if (error) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 rounded-lg bg-red-50 p-4 text-red-700">
-            <span className="text-sm font-medium">Error:</span>
-            <span className="text-sm">{error}</span>
-          </div>
-        </CardContent>
-      </Card>
+      <Alert variant="destructive">
+        <AlertDescription>
+          <span className="font-medium">Error:</span> {error}
+        </AlertDescription>
+      </Alert>
     )
   }
 
@@ -262,11 +296,11 @@ function AnalyticsResults({ result, loading, error }: AnalyticsResultsProps) {
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <BarChart3 className="mb-3 h-10 w-10 text-slate-300" />
-            <p className="text-sm font-medium text-slate-500">
+            <BarChart3 className="mb-3 h-10 w-10 text-muted-foreground/30" />
+            <p className="text-sm font-medium text-muted-foreground">
               No results yet
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground/70">
               Configure your filters above and run a query to see results
             </p>
           </div>

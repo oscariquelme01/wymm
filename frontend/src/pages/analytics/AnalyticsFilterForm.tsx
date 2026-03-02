@@ -1,35 +1,35 @@
-import { format, startOfMonth, subMonths } from "date-fns"
 import { Search, RotateCcw } from "lucide-react"
-import { Button } from "src/components/ui/button"
-import { Input } from "src/components/ui/input"
-import { Select } from "src/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "src/components/ui/card"
+} from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+import { defaultFilters } from "./constants"
 import type {
   AnalyticsFilters,
   AnalyticsQueryType,
   TimeseriesInterval,
   TransactionTypes,
-} from "src/types"
+} from "@/types"
 
 interface AnalyticsFilterFormProps {
   filters: AnalyticsFilters
   onChange: (filters: AnalyticsFilters) => void
   onSubmit: () => void
   loading: boolean
-}
-
-const defaultFilters: AnalyticsFilters = {
-  queryType: "aggregate",
-  startDate: format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd"),
-  endDate: format(new Date(), "yyyy-MM-dd"),
-  transactionType: undefined,
-  interval: "month",
 }
 
 function AnalyticsFilterForm({
@@ -41,7 +41,6 @@ function AnalyticsFilterForm({
   const handleQueryTypeChange = (queryType: AnalyticsQueryType) => {
     const updated: AnalyticsFilters = { ...filters, queryType }
 
-    // Clear fields that don't apply to the new query type
     if (queryType === "cashflow") {
       updated.transactionType = undefined
     }
@@ -79,9 +78,7 @@ function AnalyticsFilterForm({
         >
           {/* Query type selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">
-              Query Type
-            </label>
+            <Label>Query Type</Label>
             <div className="grid grid-cols-3 gap-2">
               {(
                 [
@@ -106,16 +103,19 @@ function AnalyticsFilterForm({
                   key={option.value}
                   type="button"
                   onClick={() => handleQueryTypeChange(option.value)}
-                  className={`rounded-lg border-2 p-3 text-left transition-colors ${
+                  className={cn(
+                    "rounded-lg border-2 p-3 text-left transition-colors",
                     filters.queryType === option.value
-                      ? "border-slate-900 bg-slate-50"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
+                      ? "border-primary bg-accent"
+                      : "border-border hover:border-muted-foreground/30"
+                  )}
                 >
-                  <div className="text-sm font-medium text-slate-900">
+                  <div className="text-sm font-medium text-foreground">
                     {option.label}
                   </div>
-                  <div className="text-xs text-slate-500">{option.desc}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {option.desc}
+                  </div>
                 </button>
               ))}
             </div>
@@ -124,9 +124,7 @@ function AnalyticsFilterForm({
           {/* Date range */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">
-                Start Date
-              </label>
+              <Label>Start Date</Label>
               <Input
                 type="date"
                 value={filters.startDate}
@@ -136,9 +134,7 @@ function AnalyticsFilterForm({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">
-                End Date
-              </label>
+              <Label>End Date</Label>
               <Input
                 type="date"
                 value={filters.endDate}
@@ -153,44 +149,52 @@ function AnalyticsFilterForm({
           <div className="grid grid-cols-2 gap-4">
             {showTransactionType && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Transaction Type
-                </label>
+                <Label>Transaction Type</Label>
                 <Select
-                  value={filters.transactionType ?? ""}
-                  onChange={(e) =>
+                  value={filters.transactionType ?? "all"}
+                  onValueChange={(value) =>
                     onChange({
                       ...filters,
                       transactionType:
-                        (e.target.value as TransactionTypes) || undefined,
+                        value === "all"
+                          ? undefined
+                          : (value as TransactionTypes),
                     })
                   }
                 >
-                  <option value="">All Types</option>
-                  <option value="INCOME">Income</option>
-                  <option value="EXPENSE">Expense</option>
-                  <option value="TRANSFER">Transfer</option>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="INCOME">Income</SelectItem>
+                    <SelectItem value="EXPENSE">Expense</SelectItem>
+                    <SelectItem value="TRANSFER">Transfer</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             )}
 
             {showInterval && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Interval
-                </label>
+                <Label>Interval</Label>
                 <Select
                   value={filters.interval ?? "month"}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     onChange({
                       ...filters,
-                      interval: e.target.value as TimeseriesInterval,
+                      interval: value as TimeseriesInterval,
                     })
                   }
                 >
-                  <option value="day">Daily</option>
-                  <option value="week">Weekly</option>
-                  <option value="month">Monthly</option>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select interval" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="day">Daily</SelectItem>
+                    <SelectItem value="week">Weekly</SelectItem>
+                    <SelectItem value="month">Monthly</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             )}
@@ -202,11 +206,7 @@ function AnalyticsFilterForm({
               <Search className="mr-2 h-4 w-4" />
               {loading ? "Running..." : "Run Query"}
             </Button>
-            <Button
-              type="button"
-              onClick={handleReset}
-              className="bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50"
-            >
+            <Button type="button" variant="outline" onClick={handleReset}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Reset
             </Button>
@@ -217,4 +217,4 @@ function AnalyticsFilterForm({
   )
 }
 
-export { AnalyticsFilterForm, defaultFilters }
+export { AnalyticsFilterForm }

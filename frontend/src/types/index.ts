@@ -24,6 +24,14 @@ export interface Account {
   iban: string
 }
 
+export interface TransactionUpdate {
+  amount?: number
+  date?: string
+  type?: TransactionTypes
+  description?: string
+  accountId?: string
+}
+
 export interface BankData {
   name: string
   country: string

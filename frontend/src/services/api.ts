@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { BankData, TimeseriesPoint, Transaction, Account, TransactionTypes } from '../types'
+import type { BankData, TimeseriesPoint, Transaction, Account, TransactionTypes, TransactionUpdate } from '@/types'
 
 const api = axios.create({
   baseURL: 'http://localhost:3000',
@@ -66,6 +66,18 @@ export const fetchAggregateByType = async (
     params: { startDate, endDate, type }
   })
   return response.data
+}
+
+export const updateTransaction = async (
+  id: string,
+  data: TransactionUpdate
+): Promise<Transaction> => {
+  const response = await api.patch(`/transactions/${id}`, data)
+  return response.data
+}
+
+export const deleteTransaction = async (id: string): Promise<void> => {
+  await api.delete(`/transactions/${id}`)
 }
 
 export default api

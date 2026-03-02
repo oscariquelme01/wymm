@@ -3,9 +3,10 @@ import {
   fetchAggregateByType,
   fetchCashflow,
   fetchTimeseries,
-} from "src/services/api"
-import type { AnalyticsFilters, AnalyticsResult } from "src/types"
-import { AnalyticsFilterForm, defaultFilters } from "./AnalyticsFilterForm"
+} from "@/services/api"
+import type { AnalyticsFilters, AnalyticsResult } from "@/types"
+import { AnalyticsFilterForm } from "./AnalyticsFilterForm"
+import { defaultFilters } from "./constants"
 import AnalyticsResults from "./AnalyticsResults"
 
 function Analytics() {
@@ -76,7 +77,9 @@ function Analytics() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Analytics</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
+          Analytics
+        </h2>
         <p className="text-sm text-muted-foreground">
           Build custom queries to analyze your financial data
         </p>

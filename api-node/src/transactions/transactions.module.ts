@@ -6,6 +6,7 @@ import { TRANSACTIONS_REPOSITORY } from './domain/transactions.repository.interf
 import { TRANSACTIONS_CATEGORIZATION_REPOSITORY } from './domain/transactions-categorization.repository'
 import { TransactionsController } from './infrastructure/transactions.controller'
 import { GetTransactionsUseCase } from './application/get-transactions.use-case'
+import { UpdateTransactionUseCase } from './application/update-transaction.use-case'
 import { TypeORMTransactionCategorizationRepository } from './infrastructure/typeorm-transactions-categorization.repository'
 import TransactionsCategorizationSchema from './infrastructure/typeorm-transactions-categorization.schema'
 
@@ -14,6 +15,7 @@ import TransactionsCategorizationSchema from './infrastructure/typeorm-transacti
   controllers: [TransactionsController],
   providers: [
     GetTransactionsUseCase,
+    UpdateTransactionUseCase,
     {
       provide: TRANSACTIONS_REPOSITORY,
       useClass: TypeORMTransactionsRepository,

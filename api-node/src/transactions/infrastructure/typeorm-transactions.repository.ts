@@ -44,10 +44,12 @@ export class TypeORMTransactionsRepository
 
   async findAll(
     optionalQueryParams: OptionalQueryParams
-  ): Promise<Transaction[]> {
+  ): Promise<Array<Transaction>> {
     const query = this.repository()
       .createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.account', 'account')
+      .leftJoinAndSelect('transaction.transactionCategorization', 'categorization')
+      .leftJoinAndSelect('categorization.category', 'category')
 
     this.buildOptionalQueryParams(query, optionalQueryParams)
 

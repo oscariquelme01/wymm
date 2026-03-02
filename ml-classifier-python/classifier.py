@@ -11,9 +11,8 @@ CATEGORIES = [
     "4. Entertainment & Recreation - Streaming, gaming, movies, music, sports",
     "5. Healthcare & Medical - Medical, pharmacy, dental, vision, fitness",
     "6. Utilities & Services - Electricity, water, gas, internet & phone, cable",
-    "7. Financial Services - Banking, insurance, credit cards, investments, taxes",
-    "8. Income - Salary, freelance, business, investments, government benefits",
-    "9. Government & Legal - Taxes, licenses, legal services, government fees",
+    "7. Income - Salary, freelance, business, investments, government benefits",
+    "8. Government & Legal - Taxes, licenses, legal services, government fees",
 ]
 
 def categorize_transactions(transactions: list[str]) -> list[dict]:

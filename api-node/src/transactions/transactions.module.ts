@@ -23,6 +23,6 @@ import TransactionsCategorizationSchema from './infrastructure/typeorm-transacti
       useClass: TypeORMTransactionCategorizationRepository,
     },
   ],
-  exports: [TRANSACTIONS_REPOSITORY],
+  exports: [TRANSACTIONS_REPOSITORY, TRANSACTIONS_CATEGORIZATION_REPOSITORY],
 })
 export class TransactionsModule {}

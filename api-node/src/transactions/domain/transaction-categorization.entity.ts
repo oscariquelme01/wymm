@@ -1,6 +1,6 @@
 import { Category } from "src/categories/domain/category.entity"
 import BaseModel from "src/db/domain/base.entity"
-import { Transaction } from "typeorm"
+import { Transaction } from "src/transactions/domain/transaction.entity"
 
 export enum CategorizationSource {
   USER_OVERRIDES = 'user_overrides',
@@ -10,7 +10,7 @@ export enum CategorizationSource {
 
 export interface TransactionCategorization extends BaseModel {
   source: CategorizationSource
-  confidence: number | null // the ML confidence interval
+  confidence: string | null // the ML confidence interval
   transaction: Transaction
   category: Category
 }

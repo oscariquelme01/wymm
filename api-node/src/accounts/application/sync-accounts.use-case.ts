@@ -16,6 +16,19 @@ import {
   type TransactionManager,
 } from 'src/db/domain/transaction-manager.interface'
 import { Account } from '../domain/account.entity'
+import {
+  CATEGORIES_PROVIDER,
+  type ICategoriesProvider,
+} from 'src/categories/domain/ICategories-provider.interface'
+import { CategorizationSource } from 'src/transactions/domain/transaction-categorization.entity'
+import {
+  CATEGORIES_REPOSITORY,
+  type CategoriesRepository,
+} from 'src/categories/domain/categories.repository.interface'
+import {
+  TRANSACTIONS_CATEGORIZATION_REPOSITORY,
+  type TransactionsCategorizationRepository,
+} from 'src/transactions/domain/transactions-categorization.repository'
 
 @Injectable()
 export default class SyncAccountsUseCase {
@@ -29,7 +42,13 @@ export default class SyncAccountsUseCase {
     @Inject(ACCOUNTS_REPOSITORY)
     private readonly accountsRepository: AccountsRepository,
     @Inject(TRANSACTIONS_REPOSITORY)
-    private readonly transactionsRepository: TransactionsRepository
+    private readonly transactionsRepository: TransactionsRepository,
+    @Inject(CATEGORIES_PROVIDER)
+    private readonly categoriesProvider: ICategoriesProvider,
+    @Inject(CATEGORIES_REPOSITORY)
+    private readonly categoriesRepository: CategoriesRepository,
+    @Inject(TRANSACTIONS_CATEGORIZATION_REPOSITORY)
+    private readonly transactionCategorizationRepository: TransactionsCategorizationRepository
   ) {}
 
   async execute() {
@@ -52,6 +71,7 @@ export default class SyncAccountsUseCase {
     } catch (e) {
       this.logger.error(e)
       await this.transactionManager.rollback()
+      throw e
     }
   }
 
@@ -68,10 +88,41 @@ export default class SyncAccountsUseCase {
       })
 
       if (!existingTransaction) {
-        await this.transactionsRepository.save({
+        const categorizedTransaction =
+          await this.categoriesProvider.categorizeTransaction({
+            type: transaction.type,
+            description: transaction.description,
+            amount: transaction.amount,
+          })
+
+        // create the category found if it doesn't exist
+        // this will be a 'root' category (parentId = null)
+        let category = await this.categoriesRepository.findOneBy({
+          name: categorizedTransaction.category,
+        })
+        if (!category) {
+          category = await this.categoriesRepository.save({
+            name: categorizedTransaction.category,
+            parentId: null,
+          })
+        }
+
+        const savedTransaction = await this.transactionsRepository.save({
           ...transaction,
           account: { id: account.id },
+          transactionCategorization: {
+            category: category,
+            source: CategorizationSource.ML_MODEL,
+            confidence: categorizedTransaction.confidence,
+          }
         })
+        const transactionCategorization = await this.transactionCategorizationRepository.save({
+          category: category,
+          transaction: savedTransaction,
+          source: CategorizationSource.ML_MODEL,
+          confidence: categorizedTransaction.confidence,
+        })
+        await this.transactionsRepository.update({ id: savedTransaction.id }, { transactionCategorization: transactionCategorization })
       }
     }
   }

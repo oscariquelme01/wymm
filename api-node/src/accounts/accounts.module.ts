@@ -12,6 +12,7 @@ import { DbModule } from 'src/db/db.module'
 import { SyncAccountsCron } from './infrastructure/sync-accounts.cron'
 
 import { GetAccountsUseCase } from './application/get-accounts.use-case'
+import { CategoriesModule } from 'src/categories/categories.module'
 
 @Module({
   controllers: [AccountsController],
@@ -20,6 +21,7 @@ import { GetAccountsUseCase } from './application/get-accounts.use-case'
     BankingModule,
     TransactionsModule,
     DbModule,
+    CategoriesModule
   ],
   providers: [
     SyncAccountsUseCase,

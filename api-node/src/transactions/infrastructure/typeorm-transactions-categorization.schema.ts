@@ -13,7 +13,7 @@ const TransactionsCategorizationSchema = new EntitySchema<TransactionCategorizat
       enum: CategorizationSource,
     },
     confidence: {
-      type: 'decimal',
+      type: String,
       nullable: true
     }
   },
@@ -26,7 +26,7 @@ const TransactionsCategorizationSchema = new EntitySchema<TransactionCategorizat
       }
     },
     category: {
-      type: 'one-to-one',
+      type: 'many-to-one',
       target: APP_MODULES.CATEGORIES,
       joinColumn: {
         name: 'categoryId'

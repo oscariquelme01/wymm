@@ -23,15 +23,22 @@ export interface Transaction {
   transactionCategorization: TransactionCategorization | null
 }
 
+export type AccountTypes = 'wants' | 'needs' | 'investments'
+
 export interface Account {
   id: string
   name: string
   currency: string
-  type: 'wants' | 'needs' | 'investments'
+  type: AccountTypes
   institution: string
   balance: number
   externalId: string
   iban: string
+}
+
+export interface AccountUpdate {
+  name?: string
+  type?: AccountTypes
 }
 
 export interface TransactionUpdate {

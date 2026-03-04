@@ -5,6 +5,7 @@ import {
   BarChart3,
   ArrowLeftRight,
   Tags,
+  Landmark,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
@@ -13,6 +14,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/analytics", icon: BarChart3, label: "Analytics" },
+  { to: "/accounts", icon: Landmark, label: "Accounts" },
   { to: "/transactions", icon: ArrowLeftRight, label: "Transactions" },
   { to: "/categories", icon: Tags, label: "Categories" },
   { to: "/auth", icon: WalletCards, label: "Connect Bank" },

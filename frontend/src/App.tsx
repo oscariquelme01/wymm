@@ -5,6 +5,7 @@ import Auth from "@/pages/Auth"
 import Analytics from "@/pages/analytics/Analytics"
 import Transactions from "@/pages/transactions/Transactions"
 import Categories from "@/pages/categories/Categories"
+import Accounts from "@/pages/accounts/Accounts"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
@@ -22,6 +23,7 @@ function App() {
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/categories" element={<Categories />} />
+              <Route path="/accounts" element={<Accounts />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

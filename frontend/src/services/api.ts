@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { BankData, TimeseriesPoint, Transaction, Account, TransactionTypes, TransactionUpdate, Category, CategoryCreate, CategoryUpdate } from '@/types'
+import type { BankData, TimeseriesPoint, Transaction, Account, AccountUpdate, TransactionTypes, TransactionUpdate, Category, CategoryCreate, CategoryUpdate } from '@/types'
 
 const api = axios.create({
   baseURL: 'http://localhost:3000',
@@ -48,6 +48,23 @@ export const fetchTransactions = async (startDate?: string, endDate?: string, ty
 export const fetchAccounts = async (): Promise<Account[]> => {
   const response = await api.get('/accounts')
   return response.data
+}
+
+export const updateAccount = async (id: string, data: AccountUpdate): Promise<Account> => {
+  const response = await api.patch(`/accounts/${id}`, data)
+  return response.data
+}
+
+export const deleteAccount = async (id: string): Promise<void> => {
+  await api.delete(`/accounts/${id}`)
+}
+
+export const syncAccount = async (id: string): Promise<void> => {
+  await api.post(`/accounts/${id}/sync`)
+}
+
+export const syncAllAccounts = async (): Promise<void> => {
+  await api.post('/accounts/sync-accounts')
 }
 
 export const fetchCashflow = async (startDate: string, endDate: string): Promise<number> => {

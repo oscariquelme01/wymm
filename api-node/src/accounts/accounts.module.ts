@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { TypeORMAccountsRepository } from './infrastructure/typeorm-accounts.repository'
 import AccountsSchema from './infrastructure/typeorm-accounts.schema'
@@ -13,6 +13,7 @@ import { SyncAccountsCron } from './infrastructure/sync-accounts.cron'
 
 import { GetAccountsUseCase } from './application/get-accounts.use-case'
 import { CategoriesModule } from 'src/categories/categories.module'
+import { AlertsModule } from 'src/alerts/alerts.module'
 
 @Module({
   controllers: [AccountsController],
@@ -21,7 +22,8 @@ import { CategoriesModule } from 'src/categories/categories.module'
     BankingModule,
     TransactionsModule,
     DbModule,
-    CategoriesModule
+    CategoriesModule,
+    forwardRef(() => AlertsModule),
   ],
   providers: [
     SyncAccountsUseCase,

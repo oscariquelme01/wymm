@@ -49,4 +49,11 @@ export const env = {
     redirectURL: process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel
     privateKeyPem: readEnableBankingPrivateKey(),
   },
+  telegram: {
+    botToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
+    chatId: process.env.TELEGRAM_CHAT_ID ?? '',
+    get enabled() {
+      return !!(this.botToken && this.chatId)
+    },
+  },
 }

@@ -30,6 +30,12 @@ import {
   type TransactionsCategorizationRepository,
 } from 'src/transactions/domain/transactions-categorization.repository'
 
+export interface SyncResult {
+  accountsSynced: number
+  newTransactions: number
+  errors: string[]
+}
+
 @Injectable()
 export default class SyncAccountsUseCase {
   private readonly logger = new Logger(SyncAccountsUseCase.name)
@@ -51,7 +57,9 @@ export default class SyncAccountsUseCase {
     private readonly transactionCategorizationRepository: TransactionsCategorizationRepository
   ) {}
 
-  async execute() {
+  async execute(): Promise<SyncResult> {
+    const result: SyncResult = { accountsSynced: 0, newTransactions: 0, errors: [] }
+
     try {
       await this.transactionManager.start()
       this.logger.log(`Syncing bank accounts`)
@@ -62,8 +70,16 @@ export default class SyncAccountsUseCase {
           `Syncing account with id ${account.id} and name ${account.name}...`
         )
 
-        await this.syncTransactions(account)
-        await this.syncBalances(account)
+        try {
+          const newTxns = await this.syncTransactions(account)
+          await this.syncBalances(account)
+          result.accountsSynced++
+          result.newTransactions += newTxns
+        } catch (e) {
+          const message = e instanceof Error ? e.message : String(e)
+          this.logger.error(`Failed to sync account ${account.name}: ${message}`)
+          result.errors.push(`${account.name}: ${message}`)
+        }
       }
 
       this.logger.log(`Done syncing accounts`)
@@ -73,9 +89,12 @@ export default class SyncAccountsUseCase {
       await this.transactionManager.rollback()
       throw e
     }
+
+    return result
   }
 
-  private async syncTransactions(account: Account) {
+  private async syncTransactions(account: Account): Promise<number> {
+    let newCount = 0
     const transactions = await this.bankingProvider.getTransactions(
       account.externalId
     )
@@ -123,8 +142,11 @@ export default class SyncAccountsUseCase {
           confidence: categorizedTransaction.confidence,
         })
         await this.transactionsRepository.update({ id: savedTransaction.id }, { transactionCategorization: transactionCategorization })
+        newCount++
       }
     }
+
+    return newCount
   }
 
   private async syncBalances(account: Account) {

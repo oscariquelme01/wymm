@@ -1,6 +1,8 @@
 node_modules
 /dist
 /data
-.env
-env
 *.pem
+
+# Environment files — only .env.example is tracked
+.env
+/env/.env.*

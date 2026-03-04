@@ -3,6 +3,8 @@ services:
     build:
       context: ./api-node
       dockerfile: docker/Dockerfile.dev
+    env_file:
+      - ./env/.env.dev
     environment:
       NODE_ENV: development
     volumes:
@@ -24,6 +26,8 @@ services:
     build:
       context: ./ml-classifier-python
       dockerfile: Dockerfile
+    env_file:
+      - ./env/.env.dev
     volumes:
       - ./ml-classifier-python/server.py:/app/server.py
       - ./ml-classifier-python/classifier.py:/app/classifier.py
@@ -33,6 +37,6 @@ services:
     image: ngrok/ngrok:latest
     ports:
       - "4040:4040"
-    environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    env_file:
+      - ./env/.env.dev
     command: ["http", "api:3000"]

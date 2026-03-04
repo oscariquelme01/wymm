@@ -26,13 +26,6 @@ services:
       DB_NAME: wymm
       DB_USERNAME: user
       DB_PASSWORD: user
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
-      ENABLE_BANKING_APP_ID: ${ENABLE_BANKING_APP_ID}
-      ENABLE_BANKING_PRIVATE_KEY: ${ENABLE_BANKING_PRIVATE_KEY:-}
-      ENABLE_BANKING_PRIVATE_KEY_PATH: ${ENABLE_BANKING_PRIVATE_KEY_PATH:-}
-      ENABLE_BANKING_BASE_URL: ${ENABLE_BANKING_BASE_URL:-https://api.enablebanking.com}
-      ENABLE_BANKING_AUDIENCE: ${ENABLE_BANKING_AUDIENCE:-api.enablebanking.com}
-      ENABLE_BANKING_REDIRECT_URL: ${ENABLE_BANKING_REDIRECT_URL:-}
       CLASSIFIER_URL: ${CLASSIFIER_URL:-http://ml-classifier:8000}
     depends_on:
       postgres:
@@ -45,8 +38,6 @@ services:
   ml-classifier:
     ports:
       - "8000:8000"
-    environment:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
 
 volumes:
   postgres-data:

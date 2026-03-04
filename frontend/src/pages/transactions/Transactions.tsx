@@ -25,10 +25,11 @@ import { getColumns, type TransactionsTableMeta } from "./columns"
 import {
   fetchTransactions,
   fetchAccounts,
+  fetchCategories,
   updateTransaction,
   deleteTransaction,
 } from "@/services/api"
-import type { Account, Transaction, TransactionTypes } from "@/types"
+import type { Account, Category, Transaction, TransactionTypes } from "@/types"
 
 function TransactionsPageSkeleton() {
   return (
@@ -49,6 +50,7 @@ function TransactionsPageSkeleton() {
 export default function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
   // Filters
@@ -67,16 +69,18 @@ export default function Transactions() {
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [txns, accts] = await Promise.all([
+      const [txns, accts, cats] = await Promise.all([
         fetchTransactions(
           startDate,
           endDate,
           typeFilter === "all" ? undefined : typeFilter
         ),
         fetchAccounts(),
+        fetchCategories(),
       ])
       setTransactions(txns)
       setAccounts(accts)
+      setCategories(cats)
     } catch (error) {
       console.error("Failed to load transactions", error)
       toast.error("Failed to load transactions")
@@ -168,6 +172,7 @@ export default function Transactions() {
       editingRowId,
       editingData,
       accounts,
+      categories,
       setEditingRowId,
       setEditingData,
       saveRow: handleSaveRow,
@@ -177,6 +182,7 @@ export default function Transactions() {
       editingRowId,
       editingData,
       accounts,
+      categories,
       handleSaveRow,
       handleDeleteRow,
     ]

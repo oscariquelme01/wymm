@@ -5,7 +5,6 @@ import {
   PieChart,
   ResponsiveContainer,
   Sector,
-  Tooltip,
   type PieSectorShapeProps,
 } from "recharts";
 import {

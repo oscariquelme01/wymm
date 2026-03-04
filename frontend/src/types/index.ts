@@ -1,5 +1,14 @@
 export type TransactionTypes = 'EXPENSE' | 'INCOME' | 'TRANSFER'
 
+export type CategorizationSource = 'user_overrides' | 'ml_model'
+
+export interface TransactionCategorization {
+  id: string
+  source: CategorizationSource
+  confidence: string | null
+  category: Category
+}
+
 export interface Transaction {
   id: string
   amount: number
@@ -11,6 +20,7 @@ export interface Transaction {
   creditorName?: string
   debtorName?: string
   account: Account
+  transactionCategorization: TransactionCategorization | null
 }
 
 export interface Account {
@@ -65,3 +75,21 @@ export type AnalyticsResult =
   | { kind: 'aggregate'; value: number; transactionType?: TransactionTypes }
   | { kind: 'timeseries'; data: TimeseriesPoint[]; interval: TimeseriesInterval; transactionType?: TransactionTypes }
   | { kind: 'cashflow'; value: number }
+
+export interface Category {
+  id: string
+  name: string
+  parentId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CategoryCreate {
+  name: string
+  parentId?: string | null
+}
+
+export interface CategoryUpdate {
+  name?: string
+  parentId?: string | null
+}

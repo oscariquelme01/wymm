@@ -4,6 +4,7 @@ import {
   WalletCards,
   BarChart3,
   ArrowLeftRight,
+  Tags,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
@@ -13,6 +14,7 @@ const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/analytics", icon: BarChart3, label: "Analytics" },
   { to: "/transactions", icon: ArrowLeftRight, label: "Transactions" },
+  { to: "/categories", icon: Tags, label: "Categories" },
   { to: "/auth", icon: WalletCards, label: "Connect Bank" },
 ]
 

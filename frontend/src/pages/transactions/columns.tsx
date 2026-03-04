@@ -22,13 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn, formatCurrency } from "@/lib/utils"
-import type { Account, Transaction, TransactionTypes } from "@/types"
+import type { Account, Category, Transaction, TransactionTypes } from "@/types"
 
 // Type for the table meta we pass down
 export interface TransactionsTableMeta {
   editingRowId: string | null
   editingData: Partial<Transaction> | null
   accounts: Account[]
+  categories: Category[]
   setEditingRowId: (id: string | null) => void
   setEditingData: (data: Partial<Transaction> | null) => void
   saveRow: (id: string) => void
@@ -177,6 +178,33 @@ function AccountSelectCell({
         ))}
       </SelectContent>
     </Select>
+  )
+}
+
+// Category display cell
+function CategoryCell({
+  row,
+}: {
+  row: Transaction
+}) {
+  const categorization = row.transactionCategorization
+  const categoryName = categorization?.category?.name
+
+  if (!categoryName) {
+    return <span className="text-muted-foreground">Uncategorized</span>
+  }
+
+  const source = categorization.source
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Badge variant="outline">{categoryName}</Badge>
+      {source === "ml_model" && (
+        <span className="text-[10px] text-muted-foreground" title={`Confidence: ${categorization.confidence ?? "N/A"}`}>
+          AI
+        </span>
+      )}
+    </div>
   )
 }
 
@@ -367,6 +395,16 @@ export function getColumns(): ColumnDef<Transaction>[] {
       },
       filterFn: (row, id, value) => {
         return value === "all" || row.getValue(id) === value
+      },
+    },
+    {
+      id: "category",
+      accessorFn: (row) => row.transactionCategorization?.category?.name ?? "",
+      header: ({ column }) => (
+        <SortableHeader column={column} label="Category" />
+      ),
+      cell: ({ row }) => {
+        return <CategoryCell row={row.original} />
       },
     },
     {

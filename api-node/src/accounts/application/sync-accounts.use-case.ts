@@ -1,7 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common'
 import {
   BANKING_PROVIDER,
-  TransactionData,
   type IBankingProvider,
 } from 'src/banking/domain/IBanking-provider.interface'
 import {
@@ -9,17 +8,11 @@ import {
   type AccountsRepository,
 } from 'src/accounts/domain/accounts.repository.interface'
 import {
-  TRANSACTIONS_REPOSITORY,
-  type TransactionsRepository,
-} from 'src/transactions/domain/transactions.repository.interface'
-import {
   TRANSACTION_MANAGER,
   type TransactionManager,
 } from 'src/db/domain/transaction-manager.interface'
 import { Account } from '../domain/account.entity'
-import { InjectQueue } from '@nestjs/bullmq'
-import { Queue } from 'bullmq'
-import { CATEGORIES_QUEUE } from 'src/categories/domain/category.entity'
+import StoreTransactionsUseCase from 'src/transactions/application/store-transactions.use-case'
 
 export interface SyncResult {
   accountsSynced: number
@@ -32,16 +25,13 @@ export default class SyncAccountsUseCase {
   private readonly logger = new Logger(SyncAccountsUseCase.name)
 
   constructor(
+    private readonly storeTransactionsUseCase: StoreTransactionsUseCase,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactionManager: TransactionManager,
     @Inject(BANKING_PROVIDER)
     private readonly bankingProvider: IBankingProvider,
     @Inject(ACCOUNTS_REPOSITORY)
     private readonly accountsRepository: AccountsRepository,
-    @Inject(TRANSACTIONS_REPOSITORY)
-    private readonly transactionsRepository: TransactionsRepository,
-    @InjectQueue(CATEGORIES_QUEUE)
-    private readonly categoriesQueue: Queue
   ) {}
 
   async execute(fullSync = false): Promise<SyncResult> {
@@ -62,7 +52,7 @@ export default class SyncAccountsUseCase {
         )
 
         try {
-          const newTxns = await this.syncTransactions(account)
+          const newTxns = await this.syncTransactions(account, fullSync)
           await this.syncBalances(account)
           result.accountsSynced++
           result.newTransactions += newTxns
@@ -90,54 +80,20 @@ export default class SyncAccountsUseCase {
     account: Account,
     fullSync = false
   ): Promise<number> {
-    let newCount = 0
-    let transactions: Array<TransactionData>
+    const today = new Date();
+    // Simple way to get 24 hours ago at midnight
+    const yesterday = new Date(today.setHours(0, 0, 0, 0) - 86400000);
 
-    if (fullSync) {
-      const today = new Date();
-
-      // Subtract one day
-      const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
-
-      transactions = await this.bankingProvider.getTransactions(
-        account.externalId,
-        yesterday,
-        today
-      )
-    } else {
-      transactions = await this.bankingProvider.getTransactions(
-        account.externalId
-      )
-    }
+    const response = await this.bankingProvider.getTransactions(
+      account.externalId,
+      ...(fullSync ? [] : [yesterday, new Date()])
+    );
+    const transactions = response.transactionData
 
     this.logger.debug(`Found ${transactions.length} transactions`)
 
-    for (const transaction of transactions) {
-      const existingTransaction = await this.transactionsRepository.findOneBy({
-        externalId: transaction.externalId,
-        account: { id: account.id },
-      })
-
-      if (!existingTransaction) {
-        const savedTransaction = await this.transactionsRepository.save({
-          ...transaction,
-          account: { id: account.id },
-          transactionCategorization: undefined,
-        })
-        newCount++
-
-        await this.categoriesQueue.add('categorize-transaction', {
-          type: transaction.type,
-          description: transaction.description,
-          amount: transaction.amount,
-          id: savedTransaction.id,
-        })
-      }
-    }
-
-    return newCount
+    // returns the count of new transactions found
+    return this.storeTransactionsUseCase.execute(account.id!, transactions)
   }
 
   private async syncBalances(account: Account) {

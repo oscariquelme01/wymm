@@ -9,11 +9,14 @@ import { GetTransactionsUseCase } from './application/get-transactions.use-case'
 import { UpdateTransactionUseCase } from './application/update-transaction.use-case'
 import { TypeORMTransactionCategorizationRepository } from './infrastructure/typeorm-transactions-categorization.repository'
 import TransactionsCategorizationSchema from './infrastructure/typeorm-transactions-categorization.schema'
+import StoreTransactionsUseCase from './application/store-transactions.use-case'
+import { QueuesModule } from 'src/queues/queues.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TransactionsSchema, TransactionsCategorizationSchema])],
+  imports: [TypeOrmModule.forFeature([TransactionsSchema, TransactionsCategorizationSchema]), QueuesModule],
   controllers: [TransactionsController],
   providers: [
+    StoreTransactionsUseCase,
     GetTransactionsUseCase,
     UpdateTransactionUseCase,
     {
@@ -25,6 +28,6 @@ import TransactionsCategorizationSchema from './infrastructure/typeorm-transacti
       useClass: TypeORMTransactionCategorizationRepository,
     },
   ],
-  exports: [TRANSACTIONS_REPOSITORY, TRANSACTIONS_CATEGORIZATION_REPOSITORY],
+  exports: [TRANSACTIONS_REPOSITORY, TRANSACTIONS_CATEGORIZATION_REPOSITORY, StoreTransactionsUseCase],
 })
 export class TransactionsModule {}

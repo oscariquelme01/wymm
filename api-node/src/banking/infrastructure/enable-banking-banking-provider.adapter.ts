@@ -1,4 +1,4 @@
-import { createPrivateKey, KeyObject } from 'crypto'
+import { createPrivateKey, KeyObject, randomInt } from 'crypto'
 import {
   AccountData,
   BalanceData,
@@ -21,6 +21,9 @@ import {
 
 import * as EnableBankingTypes from './enable-banking.types'
 import { URLSearchParams } from 'url'
+import { InjectQueue } from '@nestjs/bullmq'
+import { Queue } from 'bullmq'
+import { FETCH_TRANSACTIONS_QUEUE } from 'src/queues/domain/queues.consants'
 
 const MAX_TTL_SECONDS = 60 * 60 * 24
 let cachedKey: KeyObject | null = null
@@ -38,6 +41,11 @@ export const enableBankingConfig = {
 
 @Injectable()
 export class EnableBankingBankingProviderAdapter implements IBankingProvider {
+  constructor(
+    @InjectQueue(FETCH_TRANSACTIONS_QUEUE)
+    private readonly transactionsQueue: Queue
+  ) {}
+
   async listAvailableBanks() {
     const availablebanks: Array<BankData> = []
     const response = await this.makeRequest<EnableBankingTypes.AspspsResponse>(
@@ -164,13 +172,13 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         'GET'
       )
 
-      if (EnableBankingTypes.isErrorResponse(response)) {
-        throw new ExternalServiceException(
-          'Enable Banking',
-          this.formatEnableBankingErrorResponse(response),
-          response
-        )
-      }
+    if (EnableBankingTypes.isErrorResponse(response)) {
+      throw new ExternalServiceException(
+        'Enable Banking',
+        this.formatEnableBankingErrorResponse(response),
+        response
+      )
+    }
 
     const accountsData: AccountData[] = []
     for (const account of response.accounts) {
@@ -203,29 +211,33 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     }
   }
 
-  async getTransactions(accountId: string, from?: Date, to?: Date): Promise<TransactionData[]> {
+  async getTransactions(
+    accountId: string,
+    from?: Date,
+    to?: Date
+  ): Promise<{ transactionData: TransactionData[]; isDone: boolean }> {
     let allTransactions: TransactionData[] = []
     let continuationKey: string | undefined = undefined
 
     const baseParams = new URLSearchParams()
     // Only add parameters if they exist
     if (from) {
-      const fromFormatted = this.formatDateToYYYYMMDD(from);
-      baseParams.append('date_from', fromFormatted);
+      const fromFormatted = this.formatDateToYYYYMMDD(from)
+      baseParams.append('date_from', fromFormatted)
     }
     if (to) {
-      const toFormatted = this.formatDateToYYYYMMDD(to);
-      baseParams.append('date_to', toFormatted);
+      const toFormatted = this.formatDateToYYYYMMDD(to)
+      baseParams.append('date_to', toFormatted)
     }
 
     do {
-      const queryParams = new URLSearchParams(baseParams);
-       // Add the continuation key if it exists
+      const queryParams = new URLSearchParams(baseParams)
+      // Add the continuation key if it exists
       if (continuationKey) {
-        queryParams.append('continuation_key', continuationKey);
+        queryParams.append('continuation_key', continuationKey)
       }
 
-      const path: string = `/accounts/${accountId}/transactions${queryParams.toString()}`
+      const path: string = `/accounts/${accountId}/transactions?${queryParams.toString()}`
       const response =
         await this.makeRequest<EnableBankingTypes.TransactionsResponse>(
           path,
@@ -233,6 +245,24 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         )
 
       if (EnableBankingTypes.isErrorResponse(response)) {
+        // we got rate limited :(
+        // send the state to the queue, update the state in the jsonb
+        if (response.code === 429) {
+          this.transactionsQueue.add(
+            'fetch-transaction',
+            {
+              accountId,
+              dateFrom: from,
+              dateTo: to,
+              continuationKey,
+            },
+            {
+              // add some jitter cause people say that's a good idea
+              delay: 1000 * (3600 + randomInt(0, 300)),
+            }
+          )
+          return { transactionData: allTransactions, isDone: false }
+        }
         throw new ExternalServiceException(
           'Enable Banking',
           this.formatEnableBankingErrorResponse(response),
@@ -258,7 +288,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       continuationKey = response.continuation_key
     } while (continuationKey)
 
-    return allTransactions
+    return { transactionData: allTransactions, isDone: true }
   }
 
   async getBalance(account: string): Promise<BalanceData> {
@@ -352,10 +382,10 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
   }
 
   // Required format by the enable banking API
-  formatDateToYYYYMMDD (date: Date) {
-    const yyyy = date.getUTCFullYear();
-    const mm   = String(date.getUTCMonth() + 1).padStart(2, '0'); // months are 0‑indexed
-    const dd   = String(date.getUTCDate()).padStart(2, '0');
+  formatDateToYYYYMMDD(date: Date) {
+    const yyyy = date.getUTCFullYear()
+    const mm = String(date.getUTCMonth() + 1).padStart(2, '0') // months are 0‑indexed
+    const dd = String(date.getUTCDate()).padStart(2, '0')
 
     return `${yyyy}-${mm}-${dd}`
   }

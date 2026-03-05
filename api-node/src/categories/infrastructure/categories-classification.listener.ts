@@ -4,7 +4,7 @@ import {
   QueueEventsListener,
   OnQueueEvent,
 } from '@nestjs/bullmq'
-import { CATEGORIES_QUEUE } from '../domain/category.entity'
+import { CATEGORIES_QUEUE } from 'src/queues/domain/queues.consants'
 import {
   CATEGORIES_REPOSITORY,
   type CategoriesRepository,

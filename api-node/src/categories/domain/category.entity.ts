@@ -10,5 +10,3 @@ export enum ConfidenceLevels {
   MEDIUM = 'medium',
   LOW = 'low',
 }
-
-export const CATEGORIES_QUEUE = 'categories_classification_queue'

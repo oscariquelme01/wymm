@@ -48,7 +48,7 @@ export interface IBankingProvider {
   startBankAuth(name: string, country: string): Promise<string>
   authorizeSession(code: string): Promise<SessionData>
   getSessionData(sessionId: string): Promise<SessionData>
-  getTransactions(accountId: string, from?: Date, to?: Date): Promise<TransactionData[]>
+  getTransactions(accountId: string, from?: Date, to?: Date, continuationKey?: string): Promise<{ transactionData: TransactionData[], isDone: boolean }>
   getBalance(accountId: string): Promise<BalanceData>
 }
 

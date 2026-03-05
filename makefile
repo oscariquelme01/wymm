@@ -190,7 +190,7 @@ frontend.install: ## Install frontend dependencies
 # ============================================================================
 
 ml.dev: ## Start ML classifier worker (local)
-	set -a && . ./env/.env.local && set +a && cd ml-classifier-python && ./env/bin/python server.py
+	set -a && . ./env/.env.local && set +a && cd ml-classifier-python && ./env/bin/python worker.py
 
 ml.install: ## Install ML classifier Python dependencies
 	cd ml-classifier-python && ./env/bin/pip install -r requirements.txt

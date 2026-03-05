@@ -27,7 +27,7 @@ import {
 } from 'src/transactions/domain/transactions-categorization.repository'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Queue } from 'bullmq'
-import { CATEGORIES_QUEUE } from 'src/categories/domain/ICategories-provider.interface'
+import { CATEGORIES_QUEUE } from 'src/categories/domain/category.entity'
 
 export interface SyncResult {
   accountsSynced: number

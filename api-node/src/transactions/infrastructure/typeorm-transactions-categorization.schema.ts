@@ -15,6 +15,10 @@ const TransactionsCategorizationSchema = new EntitySchema<TransactionCategorizat
     confidence: {
       type: String,
       nullable: true
+    },
+    reasoning: {
+      type: String,
+      nullable: true
     }
   },
   relations: {

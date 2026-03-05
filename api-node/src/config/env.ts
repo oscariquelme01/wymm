@@ -32,9 +32,6 @@ export const env = {
     host: requireEnv('REDIS_HOST'),
     port: Number(requireEnv('REDIS_PORT')),
   },
-  classifier: {
-    url: requireEnv('CLASSIFIER_URL')
-  },
   frontend: {
     url: requireEnv('FRONTEND_URL')
   },

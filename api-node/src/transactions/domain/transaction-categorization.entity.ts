@@ -10,7 +10,8 @@ export enum CategorizationSource {
 
 export interface TransactionCategorization extends BaseModel {
   source: CategorizationSource
-  confidence: string | null // the ML confidence interval
+  confidence: string | null
+  reasoning: string | null
   transaction: Transaction
   category: Category
 }

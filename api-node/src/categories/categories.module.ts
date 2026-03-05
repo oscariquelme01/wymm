@@ -6,11 +6,12 @@ import CategoriesSchema from './infrastructure/typeorm-categories.schema'
 import { CATEGORIES_REPOSITORY } from './domain/categories.repository.interface'
 import { CategoriesController } from './infrastructure/categories.controller'
 import { CategoriesCrudService } from './application/categories.crud-service'
-import { RemoteLLMCategoriesProviderAdapter } from './infrastructure/remote-llm-categories-provider.adapter'
-import { CATEGORIES_PROVIDER, CATEGORIES_QUEUE } from './domain/ICategories-provider.interface'
+import { CATEGORIES_QUEUE } from './domain/category.entity'
 import { BullModule } from '@nestjs/bullmq'
 import { BullBoardModule } from '@bull-board/nestjs'
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { CategoriesClassificationListener } from './infrastructure/categories-classification.listener'
+import { TransactionsModule } from 'src/transactions/transactions.module'
 
 @Module({
   controllers: [CategoriesController],
@@ -23,18 +24,16 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
       name: CATEGORIES_QUEUE,
       adapter: BullMQAdapter,
     }),
+    TransactionsModule,
   ],
   providers: [
     {
       provide: CATEGORIES_REPOSITORY,
       useClass: TypeORMCategoriesRepository,
     },
-    {
-      provide: CATEGORIES_PROVIDER,
-      useClass: RemoteLLMCategoriesProviderAdapter,
-    },
     CategoriesCrudService,
+    CategoriesClassificationListener,
   ],
-  exports: [CATEGORIES_REPOSITORY, CATEGORIES_PROVIDER, BullModule],
+  exports: [CATEGORIES_REPOSITORY, BullModule],
 })
 export class CategoriesModule {}

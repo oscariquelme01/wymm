@@ -5,38 +5,49 @@ import os
 client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 
 CATEGORIES = [
-    "1. Food & Dining - Restaurants, groceries, fast food, coffee shops, food delivery",
-    "2. Transportation - Gas, rideshare, airlines, public transport, car rental",
-    "3. Shopping & Retail - Online shopping, electronics, retail, fashion, home & garden",
-    "4. Entertainment & Recreation - Streaming, gaming, movies, music, sports",
-    "5. Healthcare & Medical - Medical, pharmacy, dental, vision, fitness",
-    "6. Utilities & Services - Electricity, water, gas, internet & phone, cable",
-    "7. Income - Salary, freelance, business, investments, government benefits",
-    "8. Government & Legal - Taxes, licenses, legal services, government fees",
+    "Food & Dining",
+    "Transportation",
+    "Shopping & Retail",
+    "Entertainment & Recreation",
+    "Healthcare & Medical",
+    "Utilities & Services",
+    "Income",
+    "Government & Legal",
 ]
 
-def categorize_transactions(transactions: list[str]) -> list[dict]:
-    tx_list = "\n".join(f"{i+1}. {tx}" for i, tx in enumerate(transactions))
-    
+def categorize_transactions(transactions: list[dict]) -> list[dict]:
+    """
+    Accepts a list of transaction dicts with keys: id, description, amount, type.
+    Returns a list of dicts with keys: id, category, confidence, reasoning.
+    """
+    tx_json = json.dumps(transactions, ensure_ascii=False, indent=2)
+
     response = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=2000,
+        max_tokens=4000,
         messages=[{
             "role": "user",
-            "content": f"""Categorize these Spanish bank transactions. 
-Reply with ONLY a JSON array with fields "transaction", "category", and "confidence" (high/medium/low).
+            "content": f"""Categorize these Spanish bank transactions.
 
-Categories:
-{chr(10).join(CATEGORIES)}
+Reply with ONLY a JSON array. Each element must have:
+- "id": the transaction id (from the input)
+- "category": one of the allowed categories listed below
+- "confidence": "high", "medium", or "low"
+- "reasoning": a brief sentence explaining why you chose that category
+
+Allowed categories:
+{json.dumps(CATEGORIES, indent=2)}
 
 Transactions:
-{tx_list}
+{tx_json}
 
-Reply with valid JSON only. DO NOT create any new categories or least some as unknown, if you are not sure, include confidence as low and that's fine."""
+Rules:
+- You MUST use one of the allowed categories exactly as written. Do NOT invent new categories.
+- If unsure, pick the closest match and set confidence to "low".
+- Reply with valid JSON only, no markdown fencing."""
         }]
     )
-    
+
     text = response.content[0].text
-    # Strip markdown code blocks if present
     text = text.replace("```json", "").replace("```", "").strip()
     return json.loads(text)

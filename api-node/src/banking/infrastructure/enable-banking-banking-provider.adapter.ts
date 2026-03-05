@@ -35,6 +35,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       '/aspsps',
       'GET'
     )
+
+    if (EnableBankingTypes.isErrorResponse(response)) {
+      throw new Error(this.formatEnableBankingErrorResponse(response))
+    }
+
     for (const aspsp of response.aspsps) {
       availablebanks.push({
         name: aspsp.name,
@@ -73,7 +78,9 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       access: {
         balances: true,
         transactions: true,
-        valid_until: new Date(now.getTime() + bank.maximumConsentValidity * 1000).toISOString(),
+        valid_until: new Date(
+          now.getTime() + bank.maximumConsentValidity * 1000
+        ).toISOString(),
       },
       state: crypto.randomUUID(),
       redirect_url: env.enableBanking.redirectURL,
@@ -85,6 +92,10 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       psu_id_hash: string
       state?: string
     }>('/auth', 'POST', body)
+
+    if (EnableBankingTypes.isErrorResponse(response)) {
+      throw new Error(this.formatEnableBankingErrorResponse(response))
+    }
 
     return response.url
   }
@@ -100,6 +111,10 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         'POST',
         body
       )
+
+    if (EnableBankingTypes.isErrorResponse(response)) {
+      throw new Error(this.formatEnableBankingErrorResponse(response))
+    }
 
     const accountsData: AccountData[] = []
     for (const account of response.accounts) {
@@ -126,12 +141,20 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         'GET'
       )
 
+      if (EnableBankingTypes.isErrorResponse(response)) {
+        throw new Error(this.formatEnableBankingErrorResponse(response))
+      }
+
     const accountsData: AccountData[] = []
     for (const account of response.accounts) {
       const accountData = await this.makeRequest<EnableBankingTypes.Account>(
         `/accounts/${account}/details`,
         'GET'
       )
+
+      if (EnableBankingTypes.isErrorResponse(accountData)) {
+        throw new Error(this.formatEnableBankingErrorResponse(accountData))
+      }
 
       accountsData.push({
         id: account,
@@ -149,7 +172,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     }
   }
 
-  async getTransactions(accountId: string): Promise<TransactionData[]> {
+  async getLatestTransactions(accountId: string): Promise<TransactionData[]> {
     let allTransactions: TransactionData[] = []
     let continuationKey: string | undefined = undefined
 
@@ -163,6 +186,10 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
           path,
           'GET'
         )
+
+      if (EnableBankingTypes.isErrorResponse(response)) {
+        throw new Error(this.formatEnableBankingErrorResponse(response))
+      }
 
       const mappedTransactions: TransactionData[] = response.transactions
         .filter((t) => t.status !== 'PDNG')
@@ -192,14 +219,21 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         'GET'
       )
 
+    if (EnableBankingTypes.isErrorResponse(response)) {
+      // TODO: Should I handle retries here??
+      throw new Error(this.formatEnableBankingErrorResponse(response))
+    }
+
     // CLBD = ClosingBooked
-    const balances = response.balances.filter((balance) => ( balance.balance_type === 'CLBD')).map((balance) => ({
-      amount: parseFloat(balance.balance_amount.amount),
-      currency: balance.balance_amount.currency,
-      asOf: balance.reference_date
-        ? new Date(balance.reference_date)
-        : undefined,
-    }))
+    const balances = response.balances
+      .filter((balance) => balance.balance_type === 'CLBD')
+      .map((balance) => ({
+        amount: parseFloat(balance.balance_amount.amount),
+        currency: balance.balance_amount.currency,
+        asOf: balance.reference_date
+          ? new Date(balance.reference_date)
+          : undefined,
+      }))
 
     if (!balances.length) {
       throw new Error('Failed to get the closing booked balance')
@@ -212,7 +246,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     path: string,
     method: string,
     body: object = {}
-  ): Promise<T> {
+  ): Promise<T | EnableBankingTypes.ErrorResponse> {
     const token = await this.generateEnableBankingJwt()
     const url = `${enableBankingConfig.baseUrl}${path}`
 
@@ -227,10 +261,7 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     })
 
     if (!response.ok) {
-      const text = await response.text()
-      throw new Error(
-        `Enable Banking request failed: ${response.status} ${response.statusText} - ${text}`
-      )
+      return (await response.json()) as EnableBankingTypes.ErrorResponse
     }
 
     return (await response.json()) as T
@@ -255,5 +286,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       .setIssuedAt(now)
       .setExpirationTime(now + ttlSeconds)
       .sign(key)
+  }
+
+  formatEnableBankingErrorResponse(response: EnableBankingTypes.ErrorResponse) {
+    const hasDetail = response.detail && response.detail.length
+    const detail = hasDetail ? `: ${response.detail}` : ''
+    return `Enable banking request failed: HTTP ${response.code}: ${response.error} -- ${response.message}${detail}`
   }
 }

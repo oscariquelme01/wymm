@@ -4,6 +4,13 @@ export interface AspspsResponse {
   aspsps: Aspsp[]
 }
 
+export interface ErrorResponse {
+  message: string
+  code: number,
+  error: string,
+  detail: string
+}
+
 export interface Aspsp {
   auth_methods: AuthMethod[]
   beta: boolean
@@ -236,4 +243,8 @@ export interface Balance {
   last_change_date_time?: string
   reference_date?: string
   last_committed_transaction?: string
+}
+
+export function isErrorResponse<T extends Object>(response: ErrorResponse | T): response is ErrorResponse {
+  return "error" in response && "code" in response && "message" in response && "detail" in response
 }

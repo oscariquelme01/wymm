@@ -6,6 +6,8 @@ export enum ConfidenceLevels {
   LOW = 'low',
 }
 
+export const CATEGORIES_QUEUE = 'categories_classification_queue'
+
 
 export interface TransactionData {
     description: String

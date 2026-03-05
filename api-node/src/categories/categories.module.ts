@@ -7,12 +7,22 @@ import { CATEGORIES_REPOSITORY } from './domain/categories.repository.interface'
 import { CategoriesController } from './infrastructure/categories.controller'
 import { CategoriesCrudService } from './application/categories.crud-service'
 import { RemoteLLMCategoriesProviderAdapter } from './infrastructure/remote-llm-categories-provider.adapter'
-import { CATEGORIES_PROVIDER } from './domain/ICategories-provider.interface'
+import { CATEGORIES_PROVIDER, CATEGORIES_QUEUE } from './domain/ICategories-provider.interface'
+import { BullModule } from '@nestjs/bullmq'
+import { BullBoardModule } from '@bull-board/nestjs'
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
 
 @Module({
   controllers: [CategoriesController],
   imports: [
     TypeOrmModule.forFeature([CategoriesSchema]),
+    BullModule.registerQueue({
+      name: CATEGORIES_QUEUE,
+    }),
+    BullBoardModule.forFeature({
+      name: CATEGORIES_QUEUE,
+      adapter: BullMQAdapter,
+    }),
   ],
   providers: [
     {
@@ -21,10 +31,10 @@ import { CATEGORIES_PROVIDER } from './domain/ICategories-provider.interface'
     },
     {
       provide: CATEGORIES_PROVIDER,
-      useClass: RemoteLLMCategoriesProviderAdapter
+      useClass: RemoteLLMCategoriesProviderAdapter,
     },
-    CategoriesCrudService
+    CategoriesCrudService,
   ],
-  exports: [CATEGORIES_REPOSITORY, CATEGORIES_PROVIDER],
+  exports: [CATEGORIES_REPOSITORY, CATEGORIES_PROVIDER, BullModule],
 })
 export class CategoriesModule {}

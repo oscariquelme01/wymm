@@ -27,7 +27,11 @@ function readEnableBankingPrivateKey(): string {
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
-  port: Number(process.env.PORT ?? 3000),
+  port: Number(requireEnv('PORT')), // TODO: should be API_PORT
+  redis: {
+    host: requireEnv('REDIS_HOST'),
+    port: Number(requireEnv('REDIS_PORT')),
+  },
   classifier: {
     url: requireEnv('CLASSIFIER_URL')
   },
@@ -36,7 +40,7 @@ export const env = {
   },
   db: {
     host: requireEnv('DB_HOST'),
-    port: Number(process.env.DB_PORT) || 5432,
+    port: Number(requireEnv('DB_PORT')),
     name: requireEnv('DB_NAME'),
     password: requireEnv('DB_PASSWORD'),
     username: requireEnv('DB_USERNAME'),
@@ -46,7 +50,7 @@ export const env = {
     baseUrl:
       process.env.ENABLE_BANKING_BASE_URL ?? 'https://api.enablebanking.com',
     audience: process.env.ENABLE_BANKING_AUDIENCE ?? 'api.enablebanking.com',
-    redirectURL: process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel
+    redirectURL: process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel, might not be needed for prod
     privateKeyPem: readEnableBankingPrivateKey(),
   },
   telegram: {

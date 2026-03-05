@@ -16,20 +16,27 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     ports:
       - "3000:3000"
     environment:
       TZ: Europe/Madrid
-      PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: wymm
-      DB_USERNAME: user
-      DB_PASSWORD: user
-      CLASSIFIER_URL: ${CLASSIFIER_URL:-http://ml-classifier:8000}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   frontend:
@@ -37,8 +44,12 @@ services:
       - api
 
   ml-classifier:
-    ports:
-      - "8000:8000"
+    environment:
+      TZ: Europe/Madrid
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres-data:
+  redis-data:

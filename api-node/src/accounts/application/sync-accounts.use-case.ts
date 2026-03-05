@@ -16,10 +16,6 @@ import {
   type TransactionManager,
 } from 'src/db/domain/transaction-manager.interface'
 import { Account } from '../domain/account.entity'
-import {
-  CATEGORIES_PROVIDER,
-  type ICategoriesProvider,
-} from 'src/categories/domain/ICategories-provider.interface'
 import { CategorizationSource } from 'src/transactions/domain/transaction-categorization.entity'
 import {
   CATEGORIES_REPOSITORY,
@@ -29,6 +25,9 @@ import {
   TRANSACTIONS_CATEGORIZATION_REPOSITORY,
   type TransactionsCategorizationRepository,
 } from 'src/transactions/domain/transactions-categorization.repository'
+import { InjectQueue } from '@nestjs/bullmq'
+import { Queue } from 'bullmq'
+import { CATEGORIES_QUEUE } from 'src/categories/domain/ICategories-provider.interface'
 
 export interface SyncResult {
   accountsSynced: number
@@ -49,12 +48,8 @@ export default class SyncAccountsUseCase {
     private readonly accountsRepository: AccountsRepository,
     @Inject(TRANSACTIONS_REPOSITORY)
     private readonly transactionsRepository: TransactionsRepository,
-    @Inject(CATEGORIES_PROVIDER)
-    private readonly categoriesProvider: ICategoriesProvider,
-    @Inject(CATEGORIES_REPOSITORY)
-    private readonly categoriesRepository: CategoriesRepository,
-    @Inject(TRANSACTIONS_CATEGORIZATION_REPOSITORY)
-    private readonly transactionCategorizationRepository: TransactionsCategorizationRepository
+    @InjectQueue(CATEGORIES_QUEUE)
+    private readonly categoriesQueue: Queue,
   ) {}
 
   async execute(): Promise<SyncResult> {
@@ -95,7 +90,7 @@ export default class SyncAccountsUseCase {
 
   private async syncTransactions(account: Account): Promise<number> {
     let newCount = 0
-    const transactions = await this.bankingProvider.getTransactions(
+    const transactions = await this.bankingProvider.getLatestTransactions(
       account.externalId
     )
     this.logger.debug(`Found ${transactions.length} transactions`)
@@ -107,42 +102,19 @@ export default class SyncAccountsUseCase {
       })
 
       if (!existingTransaction) {
-        const categorizedTransaction =
-          await this.categoriesProvider.categorizeTransaction({
-            type: transaction.type,
-            description: transaction.description,
-            amount: transaction.amount,
-          })
-
-        // create the category found if it doesn't exist
-        // this will be a 'root' category (parentId = null)
-        let category = await this.categoriesRepository.findOneBy({
-          name: categorizedTransaction.category,
-        })
-        if (!category) {
-          category = await this.categoriesRepository.save({
-            name: categorizedTransaction.category,
-            parentId: null,
-          })
-        }
-
         const savedTransaction = await this.transactionsRepository.save({
           ...transaction,
           account: { id: account.id },
-          transactionCategorization: {
-            category: category,
-            source: CategorizationSource.ML_MODEL,
-            confidence: categorizedTransaction.confidence,
-          }
+          transactionCategorization: undefined
         })
-        const transactionCategorization = await this.transactionCategorizationRepository.save({
-          category: category,
-          transaction: savedTransaction,
-          source: CategorizationSource.ML_MODEL,
-          confidence: categorizedTransaction.confidence,
-        })
-        await this.transactionsRepository.update({ id: savedTransaction.id }, { transactionCategorization: transactionCategorization })
         newCount++
+
+        await this.categoriesQueue.add('categorize-transaction', {
+          type: transaction.type,
+          description: transaction.description,
+          amount: transaction.amount,
+          id: savedTransaction.id
+        })
       }
     }
 

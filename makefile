@@ -189,8 +189,8 @@ frontend.install: ## Install frontend dependencies
 # ML Classifier (Python) — Local development (outside Docker)
 # ============================================================================
 
-ml.dev: ## Start ML classifier with hot-reload (local)
-	set -a && . ./env/.env.dev && set +a && cd ml-classifier-python && ./env/bin/uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+ml.dev: ## Start ML classifier worker (local)
+	set -a && . ./env/.env.local && set +a && cd ml-classifier-python && ./env/bin/python server.py
 
 ml.install: ## Install ML classifier Python dependencies
 	cd ml-classifier-python && ./env/bin/pip install -r requirements.txt

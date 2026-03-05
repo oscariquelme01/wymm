@@ -29,9 +29,9 @@ services:
     env_file:
       - ./env/.env.dev
     volumes:
-      - ./ml-classifier-python/server.py:/app/server.py
+      - ./ml-classifier-python/worker.py:/app/worker.py
       - ./ml-classifier-python/classifier.py:/app/classifier.py
-    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: ["python", "worker.py"]
 
   ngrok:
     image: ngrok/ngrok:latest

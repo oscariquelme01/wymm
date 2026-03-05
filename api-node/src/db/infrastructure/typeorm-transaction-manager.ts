@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import { TransactionManager } from '../domain/transaction-manager.interface'
 import { DataSource } from 'typeorm'
 import { txContext } from './typeorm-transaction-context'
+import { InternalStateException } from 'src/common/exceptions/domain-exceptions'
 
 @Injectable()
 export class TypeOrmTransactionManager implements TransactionManager {
@@ -12,7 +13,7 @@ export class TypeOrmTransactionManager implements TransactionManager {
   async start(): Promise<void> {
     this.logger.log('Starting transaction...')
     if (txContext.getStore()) {
-      throw new Error('Transaction already started')
+      throw new ConflictException('Transaction already started')
     }
 
     const queryRunner = this.dataSource.createQueryRunner()
@@ -28,7 +29,9 @@ export class TypeOrmTransactionManager implements TransactionManager {
     const queryRunner = txContext.getStore()
 
     if (!queryRunner) {
-      throw new Error('No active transaction found in context')
+      throw new InternalStateException(
+        'No active transaction found in context'
+      )
     }
 
     try {
@@ -46,7 +49,9 @@ export class TypeOrmTransactionManager implements TransactionManager {
     const queryRunner = txContext.getStore()
 
     if (!queryRunner) {
-      throw new Error('No active transaction found in context')
+      throw new InternalStateException(
+        'No active transaction found in context'
+      )
     }
 
     try {

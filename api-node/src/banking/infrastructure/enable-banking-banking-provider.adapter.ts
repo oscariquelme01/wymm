@@ -9,7 +9,15 @@ import {
 } from '../domain/IBanking-provider.interface'
 import { SignJWT } from 'jose'
 import { env } from 'src/config/env'
-import { Injectable } from '@nestjs/common'
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common'
+import {
+  ExternalServiceException,
+  InternalStateException,
+} from 'src/common/exceptions/domain-exceptions'
 
 import * as EnableBankingTypes from './enable-banking.types'
 
@@ -37,7 +45,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     )
 
     if (EnableBankingTypes.isErrorResponse(response)) {
-      throw new Error(this.formatEnableBankingErrorResponse(response))
+      throw new ExternalServiceException(
+        'Enable Banking',
+        this.formatEnableBankingErrorResponse(response),
+        response
+      )
     }
 
     for (const aspsp of response.aspsps) {
@@ -58,10 +70,12 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       (bank) => bank.name === name && bank.country === country
     )
     if (!filteredBanks.length) {
-      throw new Error(`Bank ${name} from country ${country} not found!`)
+      throw new NotFoundException(
+        `Bank ${name} from country ${country} not found`
+      )
     }
     if (filteredBanks.length !== 1) {
-      throw new Error(
+      throw new BadRequestException(
         `Bank ${name} from country ${country} returned more than one result. Ambiguous request, can't tell which one to pick`
       )
     }
@@ -94,7 +108,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     }>('/auth', 'POST', body)
 
     if (EnableBankingTypes.isErrorResponse(response)) {
-      throw new Error(this.formatEnableBankingErrorResponse(response))
+      throw new ExternalServiceException(
+        'Enable Banking',
+        this.formatEnableBankingErrorResponse(response),
+        response
+      )
     }
 
     return response.url
@@ -113,7 +131,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       )
 
     if (EnableBankingTypes.isErrorResponse(response)) {
-      throw new Error(this.formatEnableBankingErrorResponse(response))
+      throw new ExternalServiceException(
+        'Enable Banking',
+        this.formatEnableBankingErrorResponse(response),
+        response
+      )
     }
 
     const accountsData: AccountData[] = []
@@ -142,7 +164,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       )
 
       if (EnableBankingTypes.isErrorResponse(response)) {
-        throw new Error(this.formatEnableBankingErrorResponse(response))
+        throw new ExternalServiceException(
+          'Enable Banking',
+          this.formatEnableBankingErrorResponse(response),
+          response
+        )
       }
 
     const accountsData: AccountData[] = []
@@ -153,7 +179,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       )
 
       if (EnableBankingTypes.isErrorResponse(accountData)) {
-        throw new Error(this.formatEnableBankingErrorResponse(accountData))
+        throw new ExternalServiceException(
+          'Enable Banking',
+          this.formatEnableBankingErrorResponse(accountData),
+          accountData
+        )
       }
 
       accountsData.push({
@@ -188,7 +218,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
         )
 
       if (EnableBankingTypes.isErrorResponse(response)) {
-        throw new Error(this.formatEnableBankingErrorResponse(response))
+        throw new ExternalServiceException(
+          'Enable Banking',
+          this.formatEnableBankingErrorResponse(response),
+          response
+        )
       }
 
       const mappedTransactions: TransactionData[] = response.transactions
@@ -221,7 +255,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
 
     if (EnableBankingTypes.isErrorResponse(response)) {
       // TODO: Should I handle retries here??
-      throw new Error(this.formatEnableBankingErrorResponse(response))
+      throw new ExternalServiceException(
+        'Enable Banking',
+        this.formatEnableBankingErrorResponse(response),
+        response
+      )
     }
 
     // CLBD = ClosingBooked
@@ -236,7 +274,9 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
       }))
 
     if (!balances.length) {
-      throw new Error('Failed to get the closing booked balance')
+      throw new InternalStateException(
+        'Failed to get the closing booked balance'
+      )
     }
 
     return balances[0]
@@ -269,7 +309,9 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
 
   private async generateEnableBankingJwt(ttlSeconds = 300): Promise<string> {
     if (ttlSeconds <= 0 || ttlSeconds > MAX_TTL_SECONDS) {
-      throw new Error(`ttl Seconds must be between 1 and ${MAX_TTL_SECONDS}`)
+      throw new BadRequestException(
+        `ttl Seconds must be between 1 and ${MAX_TTL_SECONDS}`
+      )
     }
 
     const now = Math.floor(Date.now() / 1000)

@@ -20,6 +20,7 @@ import {
 } from 'src/common/exceptions/domain-exceptions'
 
 import * as EnableBankingTypes from './enable-banking.types'
+import { URLSearchParams } from 'url'
 
 const MAX_TTL_SECONDS = 60 * 60 * 24
 let cachedKey: KeyObject | null = null
@@ -202,15 +203,29 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     }
   }
 
-  async getLatestTransactions(accountId: string): Promise<TransactionData[]> {
+  async getTransactions(accountId: string, from?: Date, to?: Date): Promise<TransactionData[]> {
     let allTransactions: TransactionData[] = []
     let continuationKey: string | undefined = undefined
 
+    const baseParams = new URLSearchParams()
+    // Only add parameters if they exist
+    if (from) {
+      const fromFormatted = this.formatDateToYYYYMMDD(from);
+      baseParams.append('date_from', fromFormatted);
+    }
+    if (to) {
+      const toFormatted = this.formatDateToYYYYMMDD(to);
+      baseParams.append('date_to', toFormatted);
+    }
+
     do {
-      const queryParams = continuationKey
-        ? `?continuation_key=${continuationKey}`
-        : ''
-      const path: string = `/accounts/${accountId}/transactions${queryParams}`
+      const queryParams = new URLSearchParams(baseParams);
+       // Add the continuation key if it exists
+      if (continuationKey) {
+        queryParams.append('continuation_key', continuationKey);
+      }
+
+      const path: string = `/accounts/${accountId}/transactions${queryParams.toString()}`
       const response =
         await this.makeRequest<EnableBankingTypes.TransactionsResponse>(
           path,
@@ -334,5 +349,14 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
     const hasDetail = response.detail && response.detail.length
     const detail = hasDetail ? `: ${response.detail}` : ''
     return `Enable banking request failed: HTTP ${response.code}: ${response.error} -- ${response.message}${detail}`
+  }
+
+  // Required format by the enable banking API
+  formatDateToYYYYMMDD (date: Date) {
+    const yyyy = date.getUTCFullYear();
+    const mm   = String(date.getUTCMonth() + 1).padStart(2, '0'); // months are 0‑indexed
+    const dd   = String(date.getUTCDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`
   }
 }

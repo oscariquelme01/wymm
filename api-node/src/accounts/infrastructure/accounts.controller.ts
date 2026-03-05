@@ -16,6 +16,6 @@ export class AccountsController {
 
   @Post('sync-accounts')
   async syncAccounts() {
-    return await this.syncAccountsUseCase.execute()
+    return await this.syncAccountsUseCase.execute(true)
   }
 }

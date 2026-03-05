@@ -1,6 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common'
 import {
   BANKING_PROVIDER,
+  TransactionData,
   type IBankingProvider,
 } from 'src/banking/domain/IBanking-provider.interface'
 import {
@@ -16,15 +17,6 @@ import {
   type TransactionManager,
 } from 'src/db/domain/transaction-manager.interface'
 import { Account } from '../domain/account.entity'
-import { CategorizationSource } from 'src/transactions/domain/transaction-categorization.entity'
-import {
-  CATEGORIES_REPOSITORY,
-  type CategoriesRepository,
-} from 'src/categories/domain/categories.repository.interface'
-import {
-  TRANSACTIONS_CATEGORIZATION_REPOSITORY,
-  type TransactionsCategorizationRepository,
-} from 'src/transactions/domain/transactions-categorization.repository'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Queue } from 'bullmq'
 import { CATEGORIES_QUEUE } from 'src/categories/domain/category.entity'
@@ -49,11 +41,15 @@ export default class SyncAccountsUseCase {
     @Inject(TRANSACTIONS_REPOSITORY)
     private readonly transactionsRepository: TransactionsRepository,
     @InjectQueue(CATEGORIES_QUEUE)
-    private readonly categoriesQueue: Queue,
+    private readonly categoriesQueue: Queue
   ) {}
 
-  async execute(): Promise<SyncResult> {
-    const result: SyncResult = { accountsSynced: 0, newTransactions: 0, errors: [] }
+  async execute(fullSync = false): Promise<SyncResult> {
+    const result: SyncResult = {
+      accountsSynced: 0,
+      newTransactions: 0,
+      errors: [],
+    }
 
     try {
       await this.transactionManager.start()
@@ -72,7 +68,9 @@ export default class SyncAccountsUseCase {
           result.newTransactions += newTxns
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e)
-          this.logger.error(`Failed to sync account ${account.name}: ${message}`)
+          this.logger.error(
+            `Failed to sync account ${account.name}: ${message}`
+          )
           result.errors.push(`${account.name}: ${message}`)
         }
       }
@@ -88,11 +86,32 @@ export default class SyncAccountsUseCase {
     return result
   }
 
-  private async syncTransactions(account: Account): Promise<number> {
+  private async syncTransactions(
+    account: Account,
+    fullSync = false
+  ): Promise<number> {
     let newCount = 0
-    const transactions = await this.bankingProvider.getLatestTransactions(
-      account.externalId
-    )
+    let transactions: Array<TransactionData>
+
+    if (fullSync) {
+      const today = new Date();
+
+      // Subtract one day
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      transactions = await this.bankingProvider.getTransactions(
+        account.externalId,
+        yesterday,
+        today
+      )
+    } else {
+      transactions = await this.bankingProvider.getTransactions(
+        account.externalId
+      )
+    }
+
     this.logger.debug(`Found ${transactions.length} transactions`)
 
     for (const transaction of transactions) {
@@ -105,7 +124,7 @@ export default class SyncAccountsUseCase {
         const savedTransaction = await this.transactionsRepository.save({
           ...transaction,
           account: { id: account.id },
-          transactionCategorization: undefined
+          transactionCategorization: undefined,
         })
         newCount++
 
@@ -113,7 +132,7 @@ export default class SyncAccountsUseCase {
           type: transaction.type,
           description: transaction.description,
           amount: transaction.amount,
-          id: savedTransaction.id
+          id: savedTransaction.id,
         })
       }
     }

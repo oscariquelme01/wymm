@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { BankData, TimeseriesPoint, Transaction, Account, AccountUpdate, TransactionTypes, TransactionUpdate, Category, CategoryCreate, CategoryUpdate } from '@/types'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:3000',
 })
 
 export const fetchBanks = async (): Promise<BankData[]> => {

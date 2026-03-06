@@ -377,7 +377,11 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
 
   formatEnableBankingErrorResponse(response: EnableBankingTypes.ErrorResponse) {
     const hasDetail = response.detail && response.detail.length
-    const detail = hasDetail ? `: ${response.detail}` : ''
+    let detail = hasDetail ? `: ${response.detail}` : ''
+
+    // try to parse it in case it is an object to now show [object Object]
+    try { detail = JSON.stringify(detail)} catch (e) {}
+
     return `Enable banking request failed: HTTP ${response.code}: ${response.error} -- ${response.message}${detail}`
   }
 

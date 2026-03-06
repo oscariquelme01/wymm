@@ -23,6 +23,7 @@ FROM node:22-alpine
 # Create app directory
 WORKDIR /app
 COPY package.json ./
+COPY 43fd2b6e-eaa9-42bc-b2fd-3a4a39874fcd.pem ./
 # If you are building your code for production
 RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist

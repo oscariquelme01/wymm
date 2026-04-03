@@ -27,7 +27,8 @@ const TransactionsCategorizationSchema = new EntitySchema<TransactionCategorizat
       target: APP_MODULES.TRANSACTIONS,
       joinColumn: {
         name: 'transactionId'
-      }
+      },
+      onDelete: 'CASCADE',
     },
     category: {
       type: 'many-to-one',

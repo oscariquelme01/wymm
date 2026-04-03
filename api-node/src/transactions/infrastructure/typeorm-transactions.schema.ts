@@ -47,6 +47,7 @@ const TransactionsSchema = new EntitySchema<Transaction>({
       joinColumn: {
         name: 'accountId',
       },
+      onDelete: 'CASCADE',
     },
     transactionCategorization: {
       type: 'one-to-one',
@@ -54,6 +55,7 @@ const TransactionsSchema = new EntitySchema<Transaction>({
       joinColumn: {
         name: 'categorizationId'
       },
+      onDelete: 'SET NULL',
     },
   },
 })

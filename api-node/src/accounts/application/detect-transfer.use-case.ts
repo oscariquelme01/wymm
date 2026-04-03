@@ -1,6 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common'
-import { randomUUID } from 'crypto'
-import { Between } from 'typeorm'
+import { Between, Not } from 'typeorm'
 import {
   TRANSACTIONS_REPOSITORY,
   type TransactionsRepository,
@@ -22,34 +21,51 @@ export class DetectTransferUseCase {
     private readonly accountsRepository: AccountsRepository
   ) {}
 
-  async execute(transaction: Transaction, counterpartIban: string) {
+  async execute(transaction: Transaction, counterpartIban?: string) {
+    // grabs all accounts and creates a map iban -> id
     const accounts = await this.accountsRepository.find()
     const ibanToAccountId = new Map(
       accounts.map((a) => [a.iban, a.id])
     )
 
-    const counterpartAccountId = ibanToAccountId.get(counterpartIban)
-    if (!counterpartAccountId) return
+    // did the bank provider filled the counterpartIban?
+    const counterpartAccountId = counterpartIban
+      ? ibanToAccountId.get(counterpartIban)
+      : undefined
 
-    this.logger.log(
-      `Transfer detected for transaction ${transaction.id} — counterpart IBAN ${counterpartIban} matches account ${counterpartAccountId}`
-    )
+    // the bank provider filled the counterpartIban but it's not one of the user's account
+    if (counterpartIban && !counterpartAccountId) return
+
+    if (counterpartAccountId) {
+      this.logger.log(
+        `Transfer detected via IBAN for transaction ${transaction.id} — counterpart IBAN ${counterpartIban} matches account ${counterpartAccountId}`
+      )
+    }
 
     const twoDaysMs = 2 * 24 * 60 * 60 * 1000
     const dateFrom = new Date(transaction.date.getTime() - twoDaysMs)
     const dateTo = new Date(transaction.date.getTime() + twoDaysMs)
     const oppositeAmount = -transaction.amount
 
+    // find all transactions within two days using either the accountId found or accountId !=  
     const candidates = await this.transactionsRepository.find({
       where: {
-        account: { id: counterpartAccountId },
+        account: { id: counterpartAccountId ?? Not(transaction.accountId) },
         amount: oppositeAmount,
         date: Between(dateFrom, dateTo),
       } as any,
     })
 
     const otherLeg = candidates[0]
-    const transferGroupId = otherLeg?.transferGroupId ?? randomUUID()
+    if (!otherLeg && !counterpartAccountId) return
+
+    if (!counterpartAccountId && otherLeg) {
+      this.logger.log(
+        `Transfer detected via amount+date fallback for transaction ${transaction.id} — matched with ${otherLeg.id}`
+      )
+    }
+
+    const transferGroupId = otherLeg?.transferGroupId!
 
     if (otherLeg) {
       this.logger.log(

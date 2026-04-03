@@ -97,11 +97,9 @@ export default class SyncAccountsUseCase {
     const savedTransactions = await this.storeTransactionsUseCase.execute(account.id!, transactions)
 
     for (const transaction of transactions) {
-      if (transaction.counterpartIban) {
-        const saved = savedTransactions.find((s) => s.externalId === transaction.externalId)
-        if (saved) {
-          await this.detectTransferUseCase.execute(saved, transaction.counterpartIban)
-        }
+      const saved = savedTransactions.find((s) => s.externalId === transaction.externalId)
+      if (saved) {
+        await this.detectTransferUseCase.execute(saved, transaction.counterpartIban)
       }
     }
 

@@ -38,9 +38,9 @@ export const fetchTimeseries = async (startDate: string, endDate: string, interv
   return response.data
 }
 
-export const fetchTransactions = async (startDate?: string, endDate?: string, type?: string, accountId?: string): Promise<Transaction[]> => {
+export const fetchTransactions = async (startDate?: string, endDate?: string, type?: string, accountId?: string, minAmount?: number, maxAmount?: number): Promise<Transaction[]> => {
   const response = await api.get('/transactions', {
-    params: { startDate, endDate, type, accountId }
+    params: { startDate, endDate, type, accountId, minAmount, maxAmount }
   })
   return response.data
 }

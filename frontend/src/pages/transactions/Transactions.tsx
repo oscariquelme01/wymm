@@ -59,6 +59,8 @@ export default function Transactions() {
   )
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [typeFilter, setTypeFilter] = useState<TransactionTypes | "all">("all")
+  const [minAmount, setMinAmount] = useState("")
+  const [maxAmount, setMaxAmount] = useState("")
 
   // Editing state
   const [editingRowId, setEditingRowId] = useState<string | null>(null)
@@ -73,7 +75,10 @@ export default function Transactions() {
         fetchTransactions(
           startDate,
           endDate,
-          typeFilter === "all" ? undefined : typeFilter
+          typeFilter === "all" ? undefined : typeFilter,
+          undefined,
+          minAmount ? parseFloat(minAmount) : undefined,
+          maxAmount ? parseFloat(maxAmount) : undefined
         ),
         fetchAccounts(),
         fetchCategories(),
@@ -87,7 +92,7 @@ export default function Transactions() {
     } finally {
       setLoading(false)
     }
-  }, [startDate, endDate, typeFilter])
+  }, [startDate, endDate, typeFilter, minAmount, maxAmount])
 
   useEffect(() => {
     loadData()
@@ -228,6 +233,24 @@ export default function Transactions() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Min Amount</Label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={minAmount}
+                onChange={(e) => setMinAmount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Max Amount</Label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                value={maxAmount}
+                onChange={(e) => setMaxAmount(e.target.value)}
               />
             </div>
             <div className="space-y-2">

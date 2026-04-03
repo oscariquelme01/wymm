@@ -15,14 +15,17 @@ export class TransactionsController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('type') type?: string,
-    @Query('accountId') accountId?: string
+    @Query('accountId') accountId?: string,
+    @Query('minAmount') minAmount?: string,
+    @Query('maxAmount') maxAmount?: string
   ) {
-
     return await this.getTransactionsUseCase.execute({
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       type: type as TransactionTypes,
       accountId,
+      minAmount: minAmount ? parseFloat(minAmount) : undefined,
+      maxAmount: maxAmount ? parseFloat(maxAmount) : undefined,
     })
   }
 

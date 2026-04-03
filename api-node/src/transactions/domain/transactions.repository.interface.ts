@@ -8,6 +8,8 @@ export type OptionalQueryParams = {
   endDate?: Date
   type?: TransactionTypes
   accountId?: string
+  minAmount?: number
+  maxAmount?: number
 }
 
 export interface TransactionsRepository extends BaseRepository<Transaction> {

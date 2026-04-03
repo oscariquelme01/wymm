@@ -52,6 +52,14 @@ const tooltipStyle = {
   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
 }
 
+const tooltipLabelStyle = {
+  color: "var(--popover-foreground)",
+}
+
+const tooltipItemStyle = {
+  color: "var(--popover-foreground)",
+}
+
 function AggregateResult({
   result,
 }: {
@@ -214,6 +222,8 @@ function TimeseriesResult({
                   />
                   <Tooltip
                     contentStyle={tooltipStyle}
+                    labelStyle={tooltipLabelStyle}
+                    itemStyle={tooltipItemStyle}
                     formatter={(value: number | undefined) => [
                       formatCurrency(value ?? 0),
                       label,
@@ -254,6 +264,8 @@ function TimeseriesResult({
                   <Tooltip
                     cursor={{ fill: "var(--accent)" }}
                     contentStyle={tooltipStyle}
+                    labelStyle={tooltipLabelStyle}
+                    itemStyle={tooltipItemStyle}
                     formatter={(value: number | undefined) => [
                       formatCurrency(value ?? 0),
                       label,

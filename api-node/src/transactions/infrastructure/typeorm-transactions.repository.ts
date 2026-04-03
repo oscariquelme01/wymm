@@ -40,6 +40,18 @@ export class TypeORMTransactionsRepository
         accountId: optionalParams.accountId,
       })
     }
+
+    if (optionalParams.minAmount !== undefined) {
+      query.andWhere('transaction.amount >= :minAmount', {
+        minAmount: optionalParams.minAmount,
+      })
+    }
+
+    if (optionalParams.maxAmount !== undefined) {
+      query.andWhere('transaction.amount <= :maxAmount', {
+        maxAmount: optionalParams.maxAmount,
+      })
+    }
   }
 
   async findAll(

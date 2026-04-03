@@ -12,6 +12,7 @@ import { DbModule } from 'src/db/db.module'
 import { SyncAccountsCron } from './infrastructure/sync-accounts.cron'
 
 import { GetAccountsUseCase } from './application/get-accounts.use-case'
+import { DeleteAccountUseCase } from './application/delete-account.use-case'
 import { DetectTransferUseCase } from './application/detect-transfer.use-case'
 import { CategoriesModule } from 'src/categories/categories.module'
 import { AlertsModule } from 'src/alerts/alerts.module'
@@ -29,6 +30,7 @@ import { AlertsModule } from 'src/alerts/alerts.module'
   providers: [
     SyncAccountsUseCase,
     GetAccountsUseCase,
+    DeleteAccountUseCase,
     DetectTransferUseCase,
     SyncAccountsCron,
     {

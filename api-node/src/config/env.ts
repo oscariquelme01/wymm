@@ -47,7 +47,7 @@ export const env = {
     baseUrl:
       process.env.ENABLE_BANKING_BASE_URL ?? 'https://api.enablebanking.com',
     audience: process.env.ENABLE_BANKING_AUDIENCE ?? 'api.enablebanking.com',
-    redirectURL: process.env.ENABLE_BANKING_REDIRECT_URL, // some ngrook tunnel, might not be needed for prod
+    redirectURL: requireEnv('ENABLE_BANKING_REDIRECT_URL'),
     privateKeyPem: readEnableBankingPrivateKey(),
   },
   telegram: {

@@ -13,6 +13,7 @@ import {
 } from 'src/db/domain/transaction-manager.interface'
 import { Account } from '../domain/account.entity'
 import StoreTransactionsUseCase from 'src/transactions/application/store-transactions.use-case'
+import { DetectTransferUseCase } from './detect-transfer.use-case'
 
 export interface SyncResult {
   accountsSynced: number
@@ -26,6 +27,7 @@ export default class SyncAccountsUseCase {
 
   constructor(
     private readonly storeTransactionsUseCase: StoreTransactionsUseCase,
+    private readonly detectTransferUseCase: DetectTransferUseCase,
     @Inject(TRANSACTION_MANAGER)
     private readonly transactionManager: TransactionManager,
     @Inject(BANKING_PROVIDER)
@@ -92,8 +94,18 @@ export default class SyncAccountsUseCase {
 
     this.logger.debug(`Found ${transactions.length} transactions`)
 
-    // returns the count of new transactions found
-    return this.storeTransactionsUseCase.execute(account.id!, transactions)
+    const savedTransactions = await this.storeTransactionsUseCase.execute(account.id!, transactions)
+
+    for (const transaction of transactions) {
+      if (transaction.counterpartIban) {
+        const saved = savedTransactions.find((s) => s.externalId === transaction.externalId)
+        if (saved) {
+          await this.detectTransferUseCase.execute(saved, transaction.counterpartIban)
+        }
+      }
+    }
+
+    return savedTransactions.length
   }
 
   private async syncBalances(account: Account) {

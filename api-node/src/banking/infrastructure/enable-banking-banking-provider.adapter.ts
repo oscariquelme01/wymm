@@ -282,6 +282,10 @@ export class EnableBankingBankingProviderAdapter implements IBankingProvider {
           externalId: t.transaction_id ?? t.entry_reference,
           creditorName: t.creditor?.name,
           debtorName: t.debtor?.name,
+          counterpartIban:
+            t.credit_debit_indicator === 'CRDT'
+              ? t.debtor_account?.iban
+              : t.creditor_account?.iban,
         }))
 
       allTransactions = [...allTransactions, ...mappedTransactions]

@@ -16,5 +16,5 @@ export interface Transaction extends BaseModel {
   accountId: string
   account: Account
   transactionCategorization: TransactionCategorization
-  // trasnferGroupId: string // TODO: implement transfers
+  transferGroupId?: string
 }

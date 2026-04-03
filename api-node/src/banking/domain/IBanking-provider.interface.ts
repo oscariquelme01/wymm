@@ -35,6 +35,7 @@ export interface TransactionData {
   creditorName?: string
   debtorName?: string
   type: TransactionTypes
+  counterpartIban?: string
 }
 
 export interface BalanceData {

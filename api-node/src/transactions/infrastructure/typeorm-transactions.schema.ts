@@ -35,6 +35,10 @@ const TransactionsSchema = new EntitySchema<Transaction>({
       type: String,
       nullable: true,
     },
+    transferGroupId: {
+      type: String,
+      nullable: true,
+    },
   },
   relations: {
     account: {

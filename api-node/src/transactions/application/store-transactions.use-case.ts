@@ -7,6 +7,7 @@ import { Inject } from '@nestjs/common'
 import { CATEGORIES_QUEUE } from 'src/queues/domain/queues.consants'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Queue } from 'bullmq'
+import { Transaction } from '../domain/transaction.entity'
 
 export default class StoreTransactionsUseCase {
   constructor(
@@ -16,8 +17,8 @@ export default class StoreTransactionsUseCase {
     private readonly categoriesQueue: Queue
   ) {}
 
-  async execute(accountId: string, transactions: Array<TransactionData>) {
-    let newCount = 0
+  async execute(accountId: string, transactions: Array<TransactionData>): Promise<Transaction[]> {
+    const newTransactions: Transaction[] = []
 
     for (const transaction of transactions) {
       const existingTransaction = await this.transactionsRepository.findOneBy({
@@ -31,7 +32,8 @@ export default class StoreTransactionsUseCase {
           account: { id: accountId },
           transactionCategorization: undefined,
         })
-        newCount++
+
+        newTransactions.push(savedTransaction)
 
         await this.categoriesQueue.add(
           'categorize-transaction',
@@ -48,6 +50,6 @@ export default class StoreTransactionsUseCase {
       }
     }
 
-    return newCount
+    return newTransactions
   }
 }

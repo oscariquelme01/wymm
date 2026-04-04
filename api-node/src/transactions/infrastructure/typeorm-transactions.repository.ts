@@ -81,6 +81,47 @@ export class TypeORMTransactionsRepository
     return result.total ? parseFloat(result.total) : 0
   }
 
+  async findTransferCandidates(
+    transaction: Transaction,
+    counterpartAccountId?: string
+  ): Promise<Transaction[]> {
+    const twoDaysMs = 2 * 24 * 60 * 60 * 1000
+    const dateFrom = new Date(transaction.date.getTime() - twoDaysMs)
+    const dateTo = new Date(transaction.date.getTime() + twoDaysMs)
+
+    const query = this.repository()
+      .createQueryBuilder('transaction')
+      .andWhere('transaction.amount = :amount', { amount: transaction.amount })
+      .andWhere('transaction.date BETWEEN :dateFrom AND :dateTo', {
+        dateFrom,
+        dateTo,
+      })
+
+    if (counterpartAccountId) {
+      query.andWhere('transaction.accountId = :accountId', {
+        accountId: counterpartAccountId,
+      })
+    } else {
+      query.andWhere('transaction.accountId != :accountId', {
+        accountId: transaction.account.id,
+      })
+    }
+
+    return query.getMany()
+  }
+
+  async linkTransfer(
+    transactionIds: string[],
+    transferGroupId: string
+  ): Promise<void> {
+    await this.repository()
+      .createQueryBuilder()
+      .update()
+      .set({ type: 'TRANSFER', transferGroupId } as any)
+      .whereInIds(transactionIds)
+      .execute()
+  }
+
   async getTimeseries(
     interval: 'day' | 'week' | 'month',
     optionalParams: OptionalQueryParams

@@ -20,4 +20,14 @@ export interface TransactionsRepository extends BaseRepository<Transaction> {
     interval: 'day' | 'week' | 'month',
     optionalParams: OptionalQueryParams
   ): Promise<{ date: Date; amount: number }[]>
+
+  findTransferCandidates(
+    transaction: Transaction,
+    counterpartAccountId?: string
+  ): Promise<Transaction[]>
+
+  linkTransfer(
+    transactionIds: string[],
+    transferGroupId: string
+  ): Promise<void>
 }

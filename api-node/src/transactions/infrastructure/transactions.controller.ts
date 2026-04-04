@@ -32,7 +32,7 @@ export class TransactionsController {
   @Patch(':id')
   async updateTransaction(
     @Param('id') id: string,
-    @Body() body: { description?: string },
+    @Body() body: { description?: string; amount?: number; date?: string; type?: TransactionTypes; accountId?: string; categoryId?: string },
   ) {
     return await this.updateTransactionUseCase.execute(id, body)
   }

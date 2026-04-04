@@ -13,7 +13,6 @@ export interface Transaction extends BaseModel {
   externalId: string
   creditorName?: string
   debtorName?: string
-  accountId: string
   account: Account
   transactionCategorization: TransactionCategorization
   transferGroupId?: string

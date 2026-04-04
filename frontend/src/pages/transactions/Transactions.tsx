@@ -42,7 +42,7 @@ function TransactionsPageSkeleton() {
         <Skeleton className="h-10 w-40" />
         <Skeleton className="h-10 w-24" />
       </div>
-      <Skeleton className="h-[600px] w-full rounded-md" />
+      <Skeleton className="h-150 w-full rounded-md" />
     </div>
   )
 }
@@ -75,10 +75,7 @@ export default function Transactions() {
         fetchTransactions(
           startDate,
           endDate,
-          typeFilter === "all" ? undefined : typeFilter,
-          undefined,
-          minAmount ? parseFloat(minAmount) : undefined,
-          maxAmount ? parseFloat(maxAmount) : undefined
+          typeFilter === "all" ? undefined : typeFilter
         ),
         fetchAccounts(),
         fetchCategories(),
@@ -92,7 +89,7 @@ export default function Transactions() {
     } finally {
       setLoading(false)
     }
-  }, [startDate, endDate, typeFilter, minAmount, maxAmount])
+  }, [startDate, endDate, typeFilter])
 
   useEffect(() => {
     loadData()
@@ -169,6 +166,15 @@ export default function Transactions() {
     },
     [transactions]
   )
+
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((t) => {
+      const amount = Math.abs(t.amount)
+      if (minAmount && amount < parseFloat(minAmount)) return false
+      if (maxAmount && amount > parseFloat(maxAmount)) return false
+      return true
+    })
+  }, [transactions, minAmount, maxAmount])
 
   const columns = useMemo(() => getColumns(), [])
 
@@ -284,7 +290,7 @@ export default function Transactions() {
         <CardContent className="pt-6">
           <DataTable
             columns={columns}
-            data={transactions}
+            data={filteredTransactions}
             filterColumn="description"
             filterPlaceholder="Search descriptions..."
             meta={tableMeta}

@@ -14,6 +14,7 @@ import {
 import { Account } from '../domain/account.entity'
 import StoreTransactionsUseCase from 'src/transactions/application/store-transactions.use-case'
 import { DetectTransferUseCase } from './detect-transfer.use-case'
+import { TRANSACTIONS_REPOSITORY, type TransactionsRepository } from 'src/transactions/domain/transactions.repository.interface'
 
 export interface SyncResult {
   accountsSynced: number
@@ -34,6 +35,8 @@ export default class SyncAccountsUseCase {
     private readonly bankingProvider: IBankingProvider,
     @Inject(ACCOUNTS_REPOSITORY)
     private readonly accountsRepository: AccountsRepository,
+    @Inject(TRANSACTIONS_REPOSITORY)
+    private readonly transactionsRepository: TransactionsRepository
   ) {}
 
   async execute(fullSync = false): Promise<SyncResult> {
@@ -45,29 +48,31 @@ export default class SyncAccountsUseCase {
 
     try {
       await this.transactionManager.start()
-      this.logger.log(`Syncing bank accounts`)
-      const allAccounts = await this.accountsRepository.find()
+      await this.transactionManager.run(async () => {
+        this.logger.log(`Syncing bank accounts`)
+        const allAccounts = await this.accountsRepository.find()
 
-      for (const account of allAccounts) {
-        this.logger.debug(
-          `Syncing account with id ${account.id} and name ${account.name}...`
-        )
-
-        try {
-          const newTxns = await this.syncTransactions(account, fullSync)
-          await this.syncBalances(account)
-          result.accountsSynced++
-          result.newTransactions += newTxns
-        } catch (e) {
-          const message = e instanceof Error ? e.message : String(e)
-          this.logger.error(
-            `Failed to sync account ${account.name}: ${message}`
+        for (const account of allAccounts) {
+          this.logger.debug(
+            `Syncing account with id ${account.id} and name ${account.name}...`
           )
-          result.errors.push(`${account.name}: ${message}`)
-        }
-      }
 
-      this.logger.log(`Done syncing accounts`)
+          try {
+            const newTxns = await this.syncTransactions(account, fullSync)
+            await this.syncBalances(account)
+            result.accountsSynced++
+            result.newTransactions += newTxns
+          } catch (e) {
+            const message = e instanceof Error ? e.message : String(e)
+            this.logger.error(
+              `Failed to sync account ${account.name}: ${message}`
+            )
+            result.errors.push(`${account.name}: ${message}`)
+          }
+        }
+
+        this.logger.log(`Done syncing accounts`)
+      })
       await this.transactionManager.commit()
     } catch (e) {
       this.logger.error(e)

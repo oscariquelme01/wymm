@@ -3,6 +3,7 @@ import {
   TRANSACTIONS_REPOSITORY,
   type TransactionsRepository,
 } from '../domain/transactions.repository.interface'
+import { TransactionTypes } from '../domain/transaction.entity'
 import {
   TRANSACTIONS_CATEGORIZATION_REPOSITORY,
   type TransactionsCategorizationRepository,
@@ -22,7 +23,7 @@ export class UpdateTransactionUseCase {
 
   async execute(
     id: string,
-    updates: { description?: string; categoryId?: string }
+    updates: { description?: string; amount?: number; date?: string; type?: TransactionTypes; accountId?: string; categoryId?: string }
   ) {
     this.logger.debug(
       `Updating transaction ${id} with ${JSON.stringify(updates)}`
@@ -36,7 +37,14 @@ export class UpdateTransactionUseCase {
     if (updates.categoryId)
       await this.categorizeTransaction(id, updates.categoryId)
 
-    await this.transactionsRepository.update({ id }, updates)
+    const { categoryId, accountId, ...directUpdates } = updates
+    const updatePayload: Record<string, unknown> = { ...directUpdates }
+
+    if (accountId) {
+      updatePayload.account = { id: accountId }
+    }
+
+    await this.transactionsRepository.update({ id }, updatePayload)
 
     return { ...transaction, ...updates }
   }

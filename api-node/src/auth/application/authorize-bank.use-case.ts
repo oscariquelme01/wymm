@@ -52,6 +52,7 @@ export default class AuthorizeBankUseCase {
 
         await this.accountsRepository.save({
           ...existingAccount,
+          externalId: accountData.id,
           name: accountData.name,
           currency: 'EUR',
           iban: accountData.iban,

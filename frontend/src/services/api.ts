@@ -63,8 +63,9 @@ export const syncAccount = async (id: string): Promise<void> => {
   await api.post(`/accounts/${id}/sync`)
 }
 
-export const syncAllAccounts = async (): Promise<void> => {
-  await api.post('/accounts/sync-accounts')
+export const syncAllAccounts = async (): Promise<{ accountsSynced: number; newTransactions: number; errors: string[] }> => {
+  const response = await api.post('/accounts/sync-accounts')
+  return response.data
 }
 
 export const fetchCashflow = async (startDate: string, endDate: string, categoryId?: string): Promise<number> => {

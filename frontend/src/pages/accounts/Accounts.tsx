@@ -138,8 +138,13 @@ export default function Accounts() {
   const handleSyncAll = useCallback(async () => {
     setSyncingAll(true)
     try {
-      await syncAllAccounts()
-      toast.success("All accounts synced")
+      const result = await syncAllAccounts()
+      if (result.errors.length > 0) {
+        result.errors.forEach((err) => toast.error(err))
+      }
+      if (result.accountsSynced > 0) {
+        toast.success(`${result.accountsSynced} account(s) synced, ${result.newTransactions} new transaction(s)`)
+      }
       const data = await fetchAccounts()
       setAccounts(data)
     } catch (error) {

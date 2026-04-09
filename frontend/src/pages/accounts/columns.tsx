@@ -215,6 +215,7 @@ function RowActions({
             meta.setEditingData({
               name: row.name,
               type: row.type,
+              institution: row.institution,
             })
           }}
         >
@@ -279,11 +280,17 @@ export function getColumns(): ColumnDef<Account>[] {
       header: ({ column }) => (
         <SortableHeader column={column} label="Institution" />
       ),
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {row.getValue("institution")}
-        </span>
-      ),
+      cell: ({ row, table }) => {
+        const meta = table.options.meta as AccountsTableMeta
+        return (
+          <EditableCell
+            value={row.getValue("institution")}
+            field="institution"
+            meta={meta}
+            rowId={row.original.id}
+          />
+        )
+      },
     },
     {
       accessorKey: "iban",

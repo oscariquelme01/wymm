@@ -39,6 +39,7 @@ export interface Account {
 export interface AccountUpdate {
   name?: string
   type?: AccountTypes
+  institution?: string
 }
 
 export interface TransactionUpdate {

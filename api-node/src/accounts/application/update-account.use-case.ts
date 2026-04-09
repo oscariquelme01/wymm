@@ -12,7 +12,7 @@ export class UpdateAccountUseCase {
     private readonly accountsRepository: AccountsRepository
   ) {}
 
-  async execute(id: string, updates: { name?: string; type?: AccountTypes }) {
+  async execute(id: string, updates: { name?: string; type?: AccountTypes; institution?: string }) {
     await this.accountsRepository.update({ id }, updates)
     return await this.accountsRepository.findOneBy({ id })
   }

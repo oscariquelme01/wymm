@@ -73,6 +73,7 @@ export default function Accounts() {
           ...a,
           name: editingData.name ?? a.name,
           type: editingData.type ?? a.type,
+          institution: editingData.institution ?? a.institution,
         }
       })
 
@@ -84,6 +85,7 @@ export default function Accounts() {
         await updateAccount(id, {
           name: editingData.name,
           type: editingData.type,
+          institution: editingData.institution,
         })
         toast.success("Account updated")
       } catch (error) {

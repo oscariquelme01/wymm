@@ -27,7 +27,7 @@ export class AccountsController {
   @Patch(':id')
   async updateAccount(
     @Param('id') id: string,
-    @Body() updates: { name?: string; type?: AccountTypes }
+    @Body() updates: { name?: string; type?: AccountTypes; institution?: string }
   ) {
     return await this.updateAccountUseCase.execute(id, updates)
   }

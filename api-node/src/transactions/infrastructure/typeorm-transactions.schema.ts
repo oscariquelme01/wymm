@@ -52,10 +52,7 @@ const TransactionsSchema = new EntitySchema<Transaction>({
     transactionCategorization: {
       type: 'one-to-one',
       target: APP_MODULES.TRANSACTIONS_CATEGORIZATION,
-      joinColumn: {
-        name: 'categorizationId'
-      },
-      onDelete: 'SET NULL',
+      inverseSide: 'transaction',
     },
   },
 })

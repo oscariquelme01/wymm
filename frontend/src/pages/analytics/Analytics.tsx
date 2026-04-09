@@ -28,7 +28,8 @@ function Analytics() {
           const value = await fetchAggregateByType(
             filters.startDate,
             filters.endDate,
-            filters.transactionType
+            filters.transactionType,
+            filters.categoryId
           )
           setResult({
             kind: "aggregate",
@@ -44,7 +45,8 @@ function Analytics() {
             filters.startDate,
             filters.endDate,
             interval,
-            filters.transactionType
+            filters.transactionType,
+            filters.categoryId
           )
           setResult({
             kind: "timeseries",
@@ -58,7 +60,8 @@ function Analytics() {
         case "cashflow": {
           const value = await fetchCashflow(
             filters.startDate,
-            filters.endDate
+            filters.endDate,
+            filters.categoryId
           )
           setResult({ kind: "cashflow", value })
           break

@@ -77,6 +77,7 @@ export interface AnalyticsFilters {
   endDate: string
   transactionType?: TransactionTypes
   interval?: TimeseriesInterval
+  categoryId?: string
 }
 
 export type AnalyticsResult =

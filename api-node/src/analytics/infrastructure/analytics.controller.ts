@@ -16,12 +16,14 @@ export class AnalyticsController {
   async getAggregate(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
-    @Query('type') type?: TransactionTypes
+    @Query('type') type?: TransactionTypes,
+    @Query('categoryId') categoryId?: string
   ) {
     return this.getAggregateUseCase.execute(
       startDate ? new Date(startDate) : undefined,
       endDate ? new Date(endDate) : undefined,
-      type
+      type,
+      categoryId
     )
   }
 
@@ -30,24 +32,28 @@ export class AnalyticsController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
     @Query('interval') interval: 'day' | 'week' | 'month',
-    @Query('type') type?: TransactionTypes
+    @Query('type') type?: TransactionTypes,
+    @Query('categoryId') categoryId?: string
   ) {
     return this.getTimeseriesUseCase.execute(
       interval,
       startDate ? new Date(startDate) : undefined,
       endDate ? new Date(endDate) : undefined,
-      type
+      type,
+      categoryId
     )
   }
 
   @Get('cashflow')
   async getCashflow(
     @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string
+    @Query('endDate') endDate: string,
+    @Query('categoryId') categoryId?: string
   ) {
     return this.getCashflowUseCase.execute(
       startDate ? new Date(startDate) : undefined,
       endDate ? new Date(endDate) : undefined,
+      categoryId
     )
   }
 }

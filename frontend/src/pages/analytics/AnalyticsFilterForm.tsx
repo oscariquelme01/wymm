@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { Search, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,9 +19,11 @@ import {
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { defaultFilters } from "./constants"
+import { fetchCategories } from "@/services/api"
 import type {
   AnalyticsFilters,
   AnalyticsQueryType,
+  Category,
   TimeseriesInterval,
   TransactionTypes,
 } from "@/types"
@@ -38,6 +41,12 @@ function AnalyticsFilterForm({
   onSubmit,
   loading,
 }: AnalyticsFilterFormProps) {
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetchCategories().then(setCategories)
+  }, [])
+
   const handleQueryTypeChange = (queryType: AnalyticsQueryType) => {
     const updated: AnalyticsFilters = { ...filters, queryType }
 
@@ -146,7 +155,7 @@ function AnalyticsFilterForm({
           </div>
 
           {/* Conditional fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {showTransactionType && (
               <div className="space-y-2">
                 <Label>Transaction Type</Label>
@@ -174,6 +183,31 @@ function AnalyticsFilterForm({
                 </Select>
               </div>
             )}
+
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select
+                value={filters.categoryId ?? "all"}
+                onValueChange={(value) =>
+                  onChange({
+                    ...filters,
+                    categoryId: value === "all" ? undefined : value,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {showInterval && (
               <div className="space-y-2">

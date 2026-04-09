@@ -12,11 +12,12 @@ export default class GetAggregateUseCase {
     private readonly transactionsRepository: TransactionsRepository
   ) {}
 
-  async execute(startDate?: Date, endDate?: Date, type?: TransactionTypes) {
+  async execute(startDate?: Date, endDate?: Date, type?: TransactionTypes, categoryId?: string) {
     return this.transactionsRepository.calculateTotal({
       startDate,
       endDate,
       type,
+      categoryId,
     })
   }
 }

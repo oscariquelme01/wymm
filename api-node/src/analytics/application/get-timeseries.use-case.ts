@@ -16,14 +16,16 @@ export default class GetTimeseriesUseCase {
     interval: 'day' | 'week' | 'month',
     startDate?: Date,
     endDate?: Date,
-    type?: TransactionTypes
+    type?: TransactionTypes,
+    categoryId?: string
   ) {
     return this.transactionsRepository.getTimeseries(
       interval,
       {
         startDate,
         endDate,
-        type
+        type,
+        categoryId,
       }
     )
   }

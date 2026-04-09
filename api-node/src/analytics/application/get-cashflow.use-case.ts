@@ -11,16 +11,18 @@ export default class GetCashflowUseCase {
     private readonly transactionsRepository: TransactionsRepository
   ) {}
 
-  async execute(startDate?: Date, endDate?: Date) {
+  async execute(startDate?: Date, endDate?: Date, categoryId?: string) {
     const income = await this.transactionsRepository.calculateTotal({
       startDate,
       endDate,
       type: 'INCOME',
+      categoryId,
     })
     const expenses = await this.transactionsRepository.calculateTotal({
       startDate,
       endDate,
       type: 'EXPENSE',
+      categoryId,
     })
 
     return income - expenses

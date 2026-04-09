@@ -52,6 +52,12 @@ export class TypeORMTransactionsRepository
         maxAmount: optionalParams.maxAmount,
       })
     }
+
+    if (optionalParams.categoryId) {
+      query.andWhere('categorization.categoryId = :categoryId', {
+        categoryId: optionalParams.categoryId,
+      })
+    }
   }
 
   async findAll(
@@ -74,6 +80,10 @@ export class TypeORMTransactionsRepository
     const query = this.repository()
       .createQueryBuilder('transaction')
       .select('SUM(transaction.amount)', 'total')
+
+    if (optionalQueryParams.categoryId) {
+      query.innerJoin('transaction.transactionCategorization', 'categorization')
+    }
 
     this.buildOptionalQueryParams(query, optionalQueryParams)
 
@@ -133,6 +143,10 @@ export class TypeORMTransactionsRepository
       .groupBy(`DATE_TRUNC(:interval, transaction.date)`)
       .orderBy('date', 'ASC')
       .setParameter('interval', interval)
+
+    if (optionalParams.categoryId) {
+      query.innerJoin('transaction.transactionCategorization', 'categorization')
+    }
 
     this.buildOptionalQueryParams(query, optionalParams)
 

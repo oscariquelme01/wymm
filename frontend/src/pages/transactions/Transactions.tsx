@@ -61,6 +61,7 @@ export default function Transactions() {
   const [typeFilter, setTypeFilter] = useState<TransactionTypes | "all">("all")
   const [minAmount, setMinAmount] = useState("")
   const [maxAmount, setMaxAmount] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
 
   // Editing state
   const [editingRowId, setEditingRowId] = useState<string | null>(null)
@@ -75,7 +76,11 @@ export default function Transactions() {
         fetchTransactions(
           startDate,
           endDate,
-          typeFilter === "all" ? undefined : typeFilter
+          typeFilter === "all" ? undefined : typeFilter,
+          undefined,
+          undefined,
+          undefined,
+          categoryFilter === "all" ? undefined : categoryFilter
         ),
         fetchAccounts(),
         fetchCategories(),
@@ -89,7 +94,7 @@ export default function Transactions() {
     } finally {
       setLoading(false)
     }
-  }, [startDate, endDate, typeFilter])
+  }, [startDate, endDate, typeFilter, categoryFilter])
 
   useEffect(() => {
     loadData()
@@ -275,6 +280,25 @@ export default function Transactions() {
                   <SelectItem value="INCOME">Income</SelectItem>
                   <SelectItem value="EXPENSE">Expense</SelectItem>
                   <SelectItem value="TRANSFER">Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select
+                value={categoryFilter}
+                onValueChange={setCategoryFilter}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

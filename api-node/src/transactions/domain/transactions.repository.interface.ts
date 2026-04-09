@@ -10,6 +10,7 @@ export type OptionalQueryParams = {
   accountId?: string
   minAmount?: number
   maxAmount?: number
+  categoryId?: string
 }
 
 export interface TransactionsRepository extends BaseRepository<Transaction> {

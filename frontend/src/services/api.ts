@@ -31,16 +31,16 @@ export const fetchAggregate = async (startDate: string, endDate: string): Promis
   }
 }
 
-export const fetchTimeseries = async (startDate: string, endDate: string, interval: 'day' | 'week' | 'month', type?: TransactionTypes): Promise<TimeseriesPoint[]> => {
+export const fetchTimeseries = async (startDate: string, endDate: string, interval: 'day' | 'week' | 'month', type?: TransactionTypes, categoryId?: string): Promise<TimeseriesPoint[]> => {
   const response = await api.get('/analytics/timeseries', {
-    params: { startDate, endDate, interval, type }
+    params: { startDate, endDate, interval, type, categoryId }
   })
   return response.data
 }
 
-export const fetchTransactions = async (startDate?: string, endDate?: string, type?: string, accountId?: string, minAmount?: number, maxAmount?: number): Promise<Transaction[]> => {
+export const fetchTransactions = async (startDate?: string, endDate?: string, type?: string, accountId?: string, minAmount?: number, maxAmount?: number, categoryId?: string): Promise<Transaction[]> => {
   const response = await api.get('/transactions', {
-    params: { startDate, endDate, type, accountId, minAmount, maxAmount }
+    params: { startDate, endDate, type, accountId, minAmount, maxAmount, categoryId }
   })
   return response.data
 }
@@ -67,9 +67,9 @@ export const syncAllAccounts = async (): Promise<void> => {
   await api.post('/accounts/sync-accounts')
 }
 
-export const fetchCashflow = async (startDate: string, endDate: string): Promise<number> => {
+export const fetchCashflow = async (startDate: string, endDate: string, categoryId?: string): Promise<number> => {
   const response = await api.get('/analytics/cashflow', {
-    params: { startDate, endDate }
+    params: { startDate, endDate, categoryId }
   })
   return response.data
 }
@@ -77,10 +77,11 @@ export const fetchCashflow = async (startDate: string, endDate: string): Promise
 export const fetchAggregateByType = async (
   startDate: string,
   endDate: string,
-  type?: TransactionTypes
+  type?: TransactionTypes,
+  categoryId?: string
 ): Promise<number> => {
   const response = await api.get('/analytics/aggregate', {
-    params: { startDate, endDate, type }
+    params: { startDate, endDate, type, categoryId }
   })
   return response.data
 }

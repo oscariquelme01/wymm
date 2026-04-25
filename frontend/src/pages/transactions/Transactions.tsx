@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { format, subMonths } from "date-fns"
+import { format, startOfMonth } from "date-fns"
 import { toast } from "sonner"
 
 import {
@@ -55,7 +55,7 @@ export default function Transactions() {
 
   // Filters
   const [startDate, setStartDate] = useState(
-    format(subMonths(new Date(), 1), "yyyy-MM-dd")
+    format(startOfMonth(new Date()), "yyyy-MM-dd")
   )
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [typeFilter, setTypeFilter] = useState<TransactionTypes | "all">("all")

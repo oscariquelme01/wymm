@@ -10,6 +10,10 @@ const TransactionsSchema = new EntitySchema<Transaction>({
     ...BaseSchema,
     amount: {
       type: 'decimal',
+      transformer: {
+        to: (value: number) => value,
+        from: (value: string | null) => (value === null ? 0 : parseFloat(value)),
+      },
     },
     currency: {
       type: String,

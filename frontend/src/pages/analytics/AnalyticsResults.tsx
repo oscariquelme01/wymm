@@ -22,6 +22,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { cn, formatCurrency } from "@/lib/utils"
+import {
+  tooltipItemStyle,
+  tooltipLabelStyle,
+  tooltipStyle,
+} from "@/lib/chart-tooltip"
 import type { AnalyticsResult } from "@/types"
 
 interface AnalyticsResultsProps {
@@ -44,21 +49,6 @@ function ResultSkeleton() {
   )
 }
 
-const tooltipStyle = {
-  borderRadius: "8px",
-  border: "1px solid var(--border)",
-  backgroundColor: "var(--popover)",
-  color: "var(--popover-foreground)",
-  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-}
-
-const tooltipLabelStyle = {
-  color: "var(--popover-foreground)",
-}
-
-const tooltipItemStyle = {
-  color: "var(--popover-foreground)",
-}
 
 function AggregateResult({
   result,

@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatCurrency } from "@/lib/utils"
+import {
+  tooltipItemStyle,
+  tooltipLabelStyle,
+  tooltipStyle,
+} from "@/lib/chart-tooltip"
 import { fetchTimeseries } from "@/services/api"
 
 const skeletonHeights = [
@@ -131,15 +136,9 @@ function CashFlowChart({ className }: { className?: string }) {
                 />
                 <Tooltip
                   cursor={{ fill: "var(--accent)" }}
-                  contentStyle={{
-                    borderRadius: "8px",
-                    border: "1px solid var(--border)",
-                    backgroundColor: "var(--popover)",
-                    color: "var(--popover-foreground)",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                  labelStyle={{ color: "var(--popover-foreground)" }}
-                  itemStyle={{ color: "var(--popover-foreground)" }}
+                  contentStyle={tooltipStyle}
+                  labelStyle={tooltipLabelStyle}
+                  itemStyle={tooltipItemStyle}
                 />
                 <Legend />
                 <Bar

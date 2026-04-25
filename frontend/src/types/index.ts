@@ -48,6 +48,7 @@ export interface TransactionUpdate {
   type?: TransactionTypes
   description?: string
   accountId?: string
+  categoryId?: string
 }
 
 export interface BankData {

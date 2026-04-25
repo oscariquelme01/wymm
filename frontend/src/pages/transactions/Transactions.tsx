@@ -152,6 +152,43 @@ export default function Transactions() {
     [editingData, transactions, accounts]
   )
 
+  const handleUpdateCategory = useCallback(
+    async (id: string, categoryId: string) => {
+      const originalTransactions = transactions
+      const category = categories.find((c) => c.id === categoryId)
+      if (!category) return
+
+      const existing = originalTransactions.find((t) => t.id === id)
+        ?.transactionCategorization
+
+      setTransactions((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                transactionCategorization: {
+                  id: existing?.id ?? "pending",
+                  source: "user_overrides",
+                  confidence: null,
+                  category,
+                },
+              }
+            : t
+        )
+      )
+
+      try {
+        await updateTransaction(id, { categoryId })
+        toast.success("Category updated")
+      } catch (error) {
+        console.error("Failed to update category", error)
+        setTransactions(originalTransactions)
+        toast.error("Failed to update category")
+      }
+    },
+    [transactions, categories]
+  )
+
   const handleDeleteRow = useCallback(
     async (id: string) => {
       const originalTransactions = [...transactions]
@@ -193,6 +230,7 @@ export default function Transactions() {
       setEditingData,
       saveRow: handleSaveRow,
       deleteRow: handleDeleteRow,
+      updateCategory: handleUpdateCategory,
     }),
     [
       editingRowId,
@@ -201,6 +239,7 @@ export default function Transactions() {
       categories,
       handleSaveRow,
       handleDeleteRow,
+      handleUpdateCategory,
     ]
   )
 

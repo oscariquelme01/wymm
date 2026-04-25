@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Check, X, Check as CheckIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { Account, Category, Transaction, TransactionTypes } from "@/types"
 
@@ -34,6 +47,7 @@ export interface TransactionsTableMeta {
   setEditingData: (data: Partial<Transaction> | null) => void
   saveRow: (id: string) => void
   deleteRow: (id: string) => void
+  updateCategory: (id: string, categoryId: string) => void
 }
 
 // Editable cell wrapper
@@ -181,30 +195,73 @@ function AccountSelectCell({
   )
 }
 
-// Category display cell
+// Category cell — click to change, autosaves
 function CategoryCell({
   row,
+  meta,
 }: {
   row: Transaction
+  meta: TransactionsTableMeta
 }) {
+  const [open, setOpen] = useState(false)
   const categorization = row.transactionCategorization
-  const categoryName = categorization?.category?.name
-
-  if (!categoryName) {
-    return <span className="text-muted-foreground">Uncategorized</span>
-  }
-
-  const source = categorization.source
+  const currentName = categorization?.category?.name
+  const currentId = categorization?.category?.id
+  const source = categorization?.source
 
   return (
-    <div className="flex items-center gap-1.5">
-      <Badge variant="outline">{categoryName}</Badge>
-      {source === "ml_model" && (
-        <span className="text-[10px] text-muted-foreground" title={`Confidence: ${categorization.confidence ?? "N/A"}`}>
-          AI
-        </span>
-      )}
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-1.5 rounded-md px-1 py-0.5 text-left transition-colors hover:bg-accent/50"
+        >
+          {currentName ? (
+            <Badge variant="outline">{currentName}</Badge>
+          ) : (
+            <span className="text-muted-foreground">Uncategorized</span>
+          )}
+          {source === "ml_model" && (
+            <span
+              className="text-[10px] text-muted-foreground"
+              title={`Confidence: ${categorization?.confidence ?? "N/A"}`}
+            >
+              AI
+            </span>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search category..." />
+          <CommandList>
+            <CommandEmpty>No category found.</CommandEmpty>
+            <CommandGroup>
+              {meta.categories.map((category) => (
+                <CommandItem
+                  key={category.id}
+                  value={category.name}
+                  onSelect={() => {
+                    if (category.id !== currentId) {
+                      meta.updateCategory(row.id, category.id)
+                    }
+                    setOpen(false)
+                  }}
+                >
+                  <CheckIcon
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      category.id === currentId ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {category.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -403,8 +460,9 @@ export function getColumns(): ColumnDef<Transaction>[] {
       header: ({ column }) => (
         <SortableHeader column={column} label="Category" />
       ),
-      cell: ({ row }) => {
-        return <CategoryCell row={row.original} />
+      cell: ({ row, table }) => {
+        const meta = table.options.meta as TransactionsTableMeta
+        return <CategoryCell row={row.original} meta={meta} />
       },
     },
     {

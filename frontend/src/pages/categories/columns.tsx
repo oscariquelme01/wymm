@@ -23,10 +23,17 @@ import {
 } from "@/components/ui/select"
 import type { Category } from "@/types"
 
+export interface TreeNode {
+  depth: number
+  isLast: boolean
+  ancestorIsLast: boolean[]
+}
+
 export interface CategoriesTableMeta {
   editingRowId: string | null
   editingData: Partial<Category> | null
   categories: Category[]
+  treeNodeById: Map<string, TreeNode>
   setEditingRowId: (id: string | null) => void
   setEditingData: (data: Partial<Category> | null) => void
   saveRow: (id: string) => void
@@ -248,16 +255,33 @@ export function getColumns(): ColumnDef<Category>[] {
   return [
     {
       accessorKey: "name",
-      header: ({ column }) => <SortableHeader column={column} label="Name" />,
+      header: () => <span className="text-sm font-medium">Name</span>,
+      enableSorting: false,
       cell: ({ row, table }) => {
         const meta = table.options.meta as CategoriesTableMeta
+        const node = meta.treeNodeById.get(row.original.id)
+        const depth = node?.depth ?? 0
+
         return (
-          <EditableCell
-            value={row.getValue("name")}
-            field="name"
-            meta={meta}
-            rowId={row.original.id}
-          />
+          <div className="flex items-center">
+            {depth > 0 && (
+              <span
+                className="select-none whitespace-pre font-mono text-muted-foreground/70"
+                aria-hidden
+              >
+                {node!.ancestorIsLast
+                  .map((last) => (last ? "   " : "│  "))
+                  .join("")}
+                {node!.isLast ? "└─ " : "├─ "}
+              </span>
+            )}
+            <EditableCell
+              value={row.getValue("name")}
+              field="name"
+              meta={meta}
+              rowId={row.original.id}
+            />
+          </div>
         )
       },
     },

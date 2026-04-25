@@ -168,17 +168,65 @@ export default function Categories() {
 
   const columns = useMemo(() => getColumns(), [])
 
+  const { sortedCategories, treeNodeById } = useMemo(() => {
+    const idSet = new Set(categories.map((c) => c.id))
+    const byParent = new Map<string | null, Category[]>()
+    for (const cat of categories) {
+      // Treat orphans (parentId points to a missing category) as roots.
+      const key = cat.parentId && idSet.has(cat.parentId) ? cat.parentId : null
+      const list = byParent.get(key) ?? []
+      list.push(cat)
+      byParent.set(key, list)
+    }
+    for (const list of byParent.values()) {
+      list.sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    const sorted: Category[] = []
+    const nodes = new Map<
+      string,
+      { depth: number; isLast: boolean; ancestorIsLast: boolean[] }
+    >()
+    const visit = (
+      parentId: string | null,
+      depth: number,
+      chain: boolean[]
+    ) => {
+      const children = byParent.get(parentId) ?? []
+      children.forEach((cat, idx) => {
+        const isLast = idx === children.length - 1
+        sorted.push(cat)
+        nodes.set(cat.id, { depth, isLast, ancestorIsLast: [...chain] })
+        // Only push current's isLast onto the chain when descendants will need
+        // a continuation column for this depth. The root level (depth 0) has
+        // no continuation column, so we skip pushing for that level.
+        const childChain = depth >= 1 ? [...chain, isLast] : chain
+        visit(cat.id, depth + 1, childChain)
+      })
+    }
+    visit(null, 0, [])
+    return { sortedCategories: sorted, treeNodeById: nodes }
+  }, [categories])
+
   const tableMeta: CategoriesTableMeta = useMemo(
     () => ({
       editingRowId,
       editingData,
       categories,
+      treeNodeById,
       setEditingRowId,
       setEditingData,
       saveRow: handleSaveRow,
       deleteRow: handleDeleteRow,
     }),
-    [editingRowId, editingData, categories, handleSaveRow, handleDeleteRow]
+    [
+      editingRowId,
+      editingData,
+      categories,
+      treeNodeById,
+      handleSaveRow,
+      handleDeleteRow,
+    ]
   )
 
   if (loading && categories.length === 0) {
@@ -269,7 +317,7 @@ export default function Categories() {
         <CardContent>
           <DataTable
             columns={columns}
-            data={categories}
+            data={sortedCategories}
             filterColumn="name"
             filterPlaceholder="Search categories..."
             meta={tableMeta}

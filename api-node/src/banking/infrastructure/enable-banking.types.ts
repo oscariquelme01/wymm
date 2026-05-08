@@ -8,7 +8,7 @@ export interface ErrorResponse {
   message: string
   code: number,
   error: string,
-  detail: string
+  detail: unknown
 }
 
 export interface Aspsp {

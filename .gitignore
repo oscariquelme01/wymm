@@ -6,3 +6,6 @@ node_modules
 # Environment files — only .env.example is tracked
 .env
 /env/.env.*
+
+# Fuck AI
+.opencode
